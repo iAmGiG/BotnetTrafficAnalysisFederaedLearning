@@ -1,5 +1,11 @@
 # fork: Botnet Traffic Analysis Federaed Learning
 This fork is intended to implement a federed learning into this existing code, as apart of the Graduate research Assistant work. 
+The origianl implementation is not fully uptodate with the latest versions of the imported libraries.
+Some of the main goals include updateding the original code to include current versions of the import Libs as well as adjust for changes required to implement a federed learning solution. 
+Federated learning is to have a distibution of the intended processing rather than data gathering to a centeralized solution. 
+This updated code is intended to run as traditional python code, then updated any notebook files as needed.
+The end goal is to have a running federed solution that could be brought to the next step if needed.
+Additional goals are to have tools such as docker and K8s or other like solutions. 
 
 ## botnet-traffic-analysis
 
