@@ -1,18 +1,19 @@
 #!/usr/bin/python
-
+# %%
 import sys
 import os
 import pandas as pd
 from glob import iglob
 import numpy as np
 from keras.models import load_model
-import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
-from keras.models import Model, Sequential
-from keras.layers import Input, Dense
-from keras.callbacks import ModelCheckpoint, TensorBoard
-from keras.optimizers import SGD
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
+from tensorflow.keras.optimizers import SGD
 
+
+# %%
 def train(top_n_features=10):
     print("Loading combined training data...")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
@@ -20,8 +21,8 @@ def train(top_n_features=10):
     fisher = pd.read_csv('../fisher.csv')
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
-    #split randomly shuffled data into 3 equal parts
-    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1/3*len(df)), int(2/3*len(df))])
+    # split randomly shuffled data into 3 equal parts
+    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     scaler = StandardScaler()
     scaler.fit(x_train.append(x_opt))
     x_train = scaler.transform(x_train)
@@ -30,21 +31,27 @@ def train(top_n_features=10):
 
     model = create_model(top_n_features)
     model.compile(loss="mean_squared_error",
-                    optimizer="sgd")
+                  optimizer="sgd")
     cp = ModelCheckpoint(filepath=f"models/model_{top_n_features}.h5",
-                               save_best_only=True,
-                               verbose=0)
+                         save_best_only=True,
+                         verbose=0)
     tb = TensorBoard(log_dir=f"./logs",
-                histogram_freq=0,
-                write_graph=True,
-                write_images=True)
+                     histogram_freq=0,
+                     write_graph=True,
+                     write_images=True)
+    NAME = "//trainData"
+    #tensorboard = TensorBoard(log_dir="logs/{}".format(NAME), histogram_freq=1, profile_batch=100000000)
+    tensorboard = TensorBoard(log_dir=f"./logs",
+                              histogram_freq=1,
+                              profile_batch=100000000)
     print(f"Training model for all data combined")
     model.fit(x_train, x_train,
-                    epochs=500,
-                    batch_size=64,
-                    validation_data=(x_opt, x_opt),
-                    verbose=1,
-                    callbacks=[cp, tb])
+              epochs=5,
+              batch_size=64,
+              validation_data=(x_opt, x_opt),
+              verbose=1,
+              callbacks=[tensorboard]
+              )
 
     print("Calculating threshold")
     x_opt_predictions = model.predict(x_opt)
@@ -66,8 +73,9 @@ def train(top_n_features=10):
     false_positives = sum(over_tr)
     test_size = mse_test.shape[0]
     print(f"{false_positives} false positives on dataset without attacks with size {test_size}")
-    
 
+
+# %%
 def create_model(input_dim):
     autoencoder = Sequential()
     autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)))
@@ -81,5 +89,6 @@ def create_model(input_dim):
     return autoencoder
 
 
+# %%
 if __name__ == '__main__':
     train(*sys.argv[1:])
