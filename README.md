@@ -1,4 +1,7 @@
-# botnet-traffic-analysis
+# fork: Botnet Traffic Analysis Federaed Learning
+This fork is intended to implement a federed learning into this existing code, as apart of the Graduate research Assistant work. 
+
+## botnet-traffic-analysis
 
 This is a project for my thesis for IoT botnet traffic analysis *DETECTING, CLASSIFYING AND EXPLAINING IOT BOTNET ATTACKS USING DEEP LEARNING METHODS BASED ON NETWORK DATA*
 
