@@ -11,6 +11,8 @@ from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.keras.optimizers import SGD
+import syft_tensorflow
+import syft
 
 
 # %%
@@ -40,7 +42,7 @@ def train(top_n_features=10):
                      write_graph=True,
                      write_images=True)
     NAME = "//trainData"
-    #tensorboard = TensorBoard(log_dir="logs/{}".format(NAME), histogram_freq=1, profile_batch=100000000)
+    # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME), histogram_freq=1, profile_batch=100000000)
     tensorboard = TensorBoard(log_dir=f"./logs",
                               histogram_freq=1,
                               profile_batch=100000000)
@@ -91,4 +93,6 @@ def create_model(input_dim):
 
 # %%
 if __name__ == '__main__':
-    train(*sys.argv[1:])
+    hook = syft_tensorflow.TensorFlowHook(train(*sys.argv[1:]))
+    # train(*sys.argv[1:])
+    remote = syft.VirtualWorker(hook, id="remote")
