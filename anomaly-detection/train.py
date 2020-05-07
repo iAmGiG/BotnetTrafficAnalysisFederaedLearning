@@ -19,10 +19,13 @@ server_type = tff.FederatedType(tf.float32, tff.SERVER)
 
 
 # %%
+# the body of the py function was traced once, disposed of, and replaced by serialized abstract representation in
+# tff lang
+#
 @tff.federated_computation(reading_type)
-def get_positives_on_dataset_without_attacks(input):
-    print(input)
-    return tff.federated_mean(input)
+def get_positives_on_dataset_without_attacks(inner_put):
+    print(tff.federated_mean(inner_put))
+    return tff.federated_mean(inner_put)
 
 
 # %%
@@ -138,4 +141,4 @@ def create_model(input_dim):
 # %%
 if __name__ == '__main__':
     # train(*sys.argv[1:])
-    get_positives_on_dataset_without_attacks(train(*sys.argv[1:]))
+    get_positives_on_dataset_without_attacks([10002012121, 2])
