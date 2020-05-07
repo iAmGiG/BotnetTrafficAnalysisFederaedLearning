@@ -14,8 +14,15 @@ from tensorflow.keras.optimizers import SGD
 import tensorflow_federated as tff
 import tensorflow as tf
 
-reading_type = tff.FederatedType(tf.dtypes.float32, tff.CLIENTS)
+reading_type = tff.FederatedType(tf.float32, tff.CLIENTS)
 server_type = tff.FederatedType(tf.float32, tff.SERVER)
+
+
+# %%
+@tff.federated_computation(reading_type)
+def get_positives_on_dataset_without_attacks(input):
+    print(input)
+    return tff.federated_mean(input)
 
 
 # %%
@@ -47,10 +54,8 @@ def create_scalar(x_opt, x_test, x_train):
 #
 # so need to be able to call this local train function, not directly, but from within a few method, that is the
 # federated computation handler method.
-
-@tff.federated_computation(tf.keras.Sequential(), server_type, get_train_data())
 def train(top_n_features=10):
-    '''
+    """
     the federated computation is much to the input of the data, not as much as pulling data out of the process.
     this does not appear obvious as the @ may indicate some callable, but this is a strongly type solution to avoid
     path-ing in the traditional way.
@@ -62,7 +67,7 @@ def train(top_n_features=10):
     the other methods will be callable from within the code.
     :param top_n_features:
     :return:
-    '''
+    """
     df = get_train_data(top_n_features)
     # split randomly shuffled data into 3 equal parts
     x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
@@ -113,6 +118,7 @@ def train(top_n_features=10):
     false_positives = sum(over_tr)
     test_size = mse_test.shape[0]
     print(f"{false_positives} false positives on dataset without attacks with size {test_size}")
+    return tr
 
 
 # %%
@@ -131,4 +137,5 @@ def create_model(input_dim):
 
 # %%
 if __name__ == '__main__':
-    train(*sys.argv[1:])
+    # train(*sys.argv[1:])
+    get_positives_on_dataset_without_attacks(train(*sys.argv[1:]))
