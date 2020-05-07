@@ -11,25 +11,63 @@ from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.keras.optimizers import SGD
-import syft_tensorflow
-import syft
+import tensorflow_federated as tff
+import tensorflow as tf
+
+reading_type = tff.FederatedType(tf.dtypes.float32, tff.CLIENTS)
+server_type = tff.FederatedType(tf.float32, tff.SERVER)
 
 
 # %%
-def train(top_n_features=10):
+def get_train_data(top_n_features):
     print("Loading combined training data...")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
-
     fisher = pd.read_csv('../fisher.csv')
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
+    return df
+
+
+# %%
+def create_scalar(x_opt, x_test, x_train):
+    scalar = StandardScaler()
+    scalar.fit(x_train.append(x_opt))
+    x_train = scalar.transform(x_train)
+    x_opt = scalar.transform(x_opt)
+    x_test = scalar.transform(x_test)
+    return x_train, x_opt, x_test
+
+
+# %%
+# break monolith into multiple parts
+# data gathering
+# data splitting
+# data transformation
+# fitting
+#
+# so need to be able to call this local train function, not directly, but from within a few method, that is the
+# federated computation handler method.
+
+@tff.federated_computation(tf.keras.Sequential(), server_type, get_train_data())
+def train(top_n_features=10):
+    '''
+    the federated computation is much to the input of the data, not as much as pulling data out of the process.
+    this does not appear obvious as the @ may indicate some callable, but this is a strongly type solution to avoid
+    path-ing in the traditional way.
+    the main reason this appears to be done is to have the ability to just broadcast on the network to listening nodes.
+    these nodes would then received a package from some server, and it has to be ready to retrieve the packages in a
+    generic way.
+    so we tell it what to possibly expect, rather than what to exactly expect
+    this is why we see in the examples that the high level federated computation is a simple MVC style method, is that
+    the other methods will be callable from within the code.
+    :param top_n_features:
+    :return:
+    '''
+    df = get_train_data(top_n_features)
     # split randomly shuffled data into 3 equal parts
     x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
-    scaler = StandardScaler()
-    scaler.fit(x_train.append(x_opt))
-    x_train = scaler.transform(x_train)
-    x_opt = scaler.transform(x_opt)
-    x_test = scaler.transform(x_test)
+    # craft scalar
+    x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
 
     model = create_model(top_n_features)
     model.compile(loss="mean_squared_error",
@@ -93,6 +131,4 @@ def create_model(input_dim):
 
 # %%
 if __name__ == '__main__':
-    hook = syft_tensorflow.TensorFlowHook(train(*sys.argv[1:]))
-    # train(*sys.argv[1:])
-    remote = syft.VirtualWorker(hook, id="remote")
+    train(*sys.argv[1:])
