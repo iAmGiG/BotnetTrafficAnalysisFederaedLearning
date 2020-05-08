@@ -14,8 +14,8 @@ from tensorflow.keras.optimizers import SGD
 import tensorflow_federated as tff
 import tensorflow as tf
 
-reading_type = tff.FederatedType(tf.float32, tff.CLIENTS)
-server_type = tff.FederatedType(tf.float32, tff.SERVER)
+reading_type = tff.FederatedType(tf.float64, tff.CLIENTS)
+server_type = tff.FederatedType(tf.float64, tff.SERVER)
 
 
 # %%
@@ -29,7 +29,7 @@ def get_positives_on_dataset_without_attacks(inner_put):
 
 
 # %%
-def get_train_data(top_n_features):
+def get_train_data(top_n_features=10):
     print("Loading combined training data...")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
     fisher = pd.read_csv('../fisher.csv')
@@ -46,6 +46,26 @@ def create_scalar(x_opt, x_test, x_train):
     x_opt = scalar.transform(x_opt)
     x_test = scalar.transform(x_test)
     return x_train, x_opt, x_test
+
+
+# %%
+def calculating_threshold(model, top_n_features, x_opt):
+    # threshold
+    print("Calculating threshold")
+    x_opt_predictions = model.predict(x_opt)
+    # mean squared error
+    print("Calculating MSE on optimization set...")
+    mse = np.mean(np.power(x_opt - x_opt_predictions, 2), axis=1)
+    print("mean is %.5f" % mse.mean())
+    print("min is %.5f" % mse.min())
+    print("max is %.5f" % mse.max())
+    print("std is %.5f" % mse.std())
+    # threshold calculation
+    tr = mse.mean() + mse.std()
+    with open(f'threshold_{top_n_features}', 'w') as t:
+        t.write(str(tr))
+    print(f"Calculated threshold is {tr}")
+    return tr
 
 
 # %%
@@ -73,13 +93,19 @@ def train(top_n_features=10):
     """
     df = get_train_data(top_n_features)
     # split randomly shuffled data into 3 equal parts
+    # this need reevaluation for a real time state one day.
+    # what does the data look like split up across a real time state?
     x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     # craft scalar
     x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
-
+    # create the model from the top features
     model = create_model(top_n_features)
-    model.compile(loss="mean_squared_error",
-                  optimizer="sgd")
+    # compile the model
+    model.compile(
+        loss="mean_squared_error",
+        optimizer="sgd")
+
+    # all of the call backs
     cp = ModelCheckpoint(filepath=f"models/model_{top_n_features}.h5",
                          save_best_only=True,
                          verbose=0)
@@ -92,36 +118,34 @@ def train(top_n_features=10):
     tensorboard = TensorBoard(log_dir=f"./logs",
                               histogram_freq=1,
                               profile_batch=100000000)
+    # end oc all backs
     print(f"Training model for all data combined")
-    model.fit(x_train, x_train,
+
+    # fitting the model
+    model.fit(x_train,
+              x_train,
               epochs=5,
               batch_size=64,
               validation_data=(x_opt, x_opt),
               verbose=1,
               callbacks=[tensorboard]
               )
+    # threshold calculation
+    tr = calculating_threshold(model, top_n_features, x_opt)
 
-    print("Calculating threshold")
-    x_opt_predictions = model.predict(x_opt)
-    print("Calculating MSE on optimization set...")
-    mse = np.mean(np.power(x_opt - x_opt_predictions, 2), axis=1)
-    print("mean is %.5f" % mse.mean())
-    print("min is %.5f" % mse.min())
-    print("max is %.5f" % mse.max())
-    print("std is %.5f" % mse.std())
-    tr = mse.mean() + mse.std()
-    with open(f'threshold_{top_n_features}', 'w') as t:
-        t.write(str(tr))
-    print(f"Calculated threshold is {tr}")
-
+    # prediction time, then the comparision of over the threshold, any false_positives,
     x_test_predictions = model.predict(x_test)
     print("Calculating MSE on test set...")
+
+    #  Returns the average of the array elements. The average is taken over
+    #  the flattened array by default, otherwise over the specified axis.
+    #  `float64` intermediate and return values are used for integer inputs.
     mse_test = np.mean(np.power(x_test - x_test_predictions, 2), axis=1)
     over_tr = mse_test > tr
     false_positives = sum(over_tr)
     test_size = mse_test.shape[0]
     print(f"{false_positives} false positives on dataset without attacks with size {test_size}")
-    return tr
+    return mse_test
 
 
 # %%
@@ -140,5 +164,6 @@ def create_model(input_dim):
 
 # %%
 if __name__ == '__main__':
-    # train(*sys.argv[1:])
-    get_positives_on_dataset_without_attacks([10002012121, 2])
+    jput = get_train_data(*sys.argv[1:])
+    print(jput)
+
