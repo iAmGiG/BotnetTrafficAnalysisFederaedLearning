@@ -1,22 +1,24 @@
-# This read me details many of the upgrades that have occurred during the upgrades to tensorflow federated,
+# This read me details many of the upgrades that have occurred during the implemetnation oftensorflow federated,
 ## includes some details on pysyft-tensorflow and what the end plan is intended to be.
 ### includes running details that have/where updated from the original README in THIS folder.
-* the original README was outdated during the initial fork of the repo, and many updates to the code had to be made.
-* TFF tensorflow_federated
-* TF tensorflow
-* I = GIGA
+* the original README was becomeing data and many updates to the code had to be made.
+* terms:
+	* TFF tensorflow_federated
+	* TF tensorflow
+	* I = [fork author GIGA]
 
 # training: 
-### details on training.
+details on training.
+###
 ## updates
 * the download.py can be modified to work, the issues were many of the libs where not needed
 	or became outdated. more details in another README file(maybe)
 * the dependencies are not simple to work with.
-	*	tensorflow federated (as of May 2020) still does not work with python 3.8 (sure to change soon(maybe))
-	*	when working with any of the code, be sure to either containerize with tools such as docker or use conda environments
+	* tensorflow federated (as of May 2020) still does not work with python 3.8 (sure to change soon(maybe))
+	* when working with any of the code, be sure to either containerize with tools such as docker or use conda environments
 		* this will make working with the code inside local IDE's (such as PyCharm) smother
-	* 	most of the code should work right away with notebook runners such as google colab.
-	*	but most to all the testing done during modification was done in PyCharm (historical raisins)
+	* most of the code should work right away with notebook runners such as google colab.
+	* but most to all the testing done during modification was done in PyCharm (historical raisins)
 * when working with environments such as conda environs, be sure to work with 3.7.x until notice about TensorFlow federated working with 3.7 < [beyond]
 * more on conda: anaconda navigator (as of May 2020) will not have tensorflow_federated within the repos,
 	* so, any set ups will require you to use your pip terminal/cmd to install TFF
@@ -26,8 +28,8 @@
 * device names will still work the same on input, but I left the sys.args input as is for the moment (historical raisins)
 
 ## changes
-*	 lots of refactoring done to move closer to an MVC (model view control) framework.
-*	 the major changes will be for the TFF material and left the OG (original) file in place for reference.
+* lots of refactoring done to move closer to an MVC (model view control) framework.
+* the major changes will be for the TFF material and left the OG (original) file in place for reference.
 
 
 ## tensorflow details
@@ -43,4 +45,4 @@
 
 
 # testing:
-*** haven't touched it YET.
+*haven't touched it YET.*
