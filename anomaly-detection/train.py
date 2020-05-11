@@ -1,16 +1,16 @@
 #!/usr/bin/python
 # %%
 import sys
-import os
+# import os
 import pandas as pd
 from glob import iglob
 import numpy as np
-from keras.models import load_model
+# from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
-from tensorflow.keras.optimizers import SGD
+# from tensorflow.keras.optimizers import SGD
 import tensorflow_federated as tff
 import tensorflow as tf
 
@@ -62,7 +62,7 @@ def calculating_threshold(model, top_n_features, x_opt):
     print("std is %.5f" % mse.std())
     # threshold calculation
     tr = mse.mean() + mse.std()
-    with open(f'threshold_{top_n_features}', 'w') as t:
+    with open(f"threshold_{top_n_features}", 'w') as t:
         t.write(str(tr))
     print(f"Calculated threshold is {tr}")
     return tr
@@ -164,6 +164,5 @@ def create_model(input_dim):
 
 # %%
 if __name__ == '__main__':
-    jput = get_train_data(*sys.argv[1:])
+    jput = train(*sys.argv[1:])
     print(jput)
-

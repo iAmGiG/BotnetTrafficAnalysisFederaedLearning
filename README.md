@@ -9,11 +9,14 @@ Additional goals are to have tools such as docker and K8s or other like solution
 
 developments: 
 the core way that tensorflow federated is intended to work is to send clients, via broad-cast, the expected data and types to be computed.
+## the distibuted aggregation protocol - in tff think of this like a fucntion - inputs live on the clients outputs live on the server.
+### we can give it a functional type signature. 
 
 issues:
 this way does not make a flow of client first easy to approach. this is because you still need a master controller to boradcast controls to 
 the individual clients the information that is required, rather than have the ablity for clients to broadcast to any server that is listening out for
 there specific model. 
+
 
 ## botnet-traffic-analysis
 
