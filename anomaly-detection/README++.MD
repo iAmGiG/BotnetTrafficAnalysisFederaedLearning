@@ -5,8 +5,9 @@
 *** TFF tensorflow_federated
 *** TF tensorflow
 
-# training:
-# updates
+# training: 
+### details on training.
+## updates
 * the download.py can be modified to work, the issues was many of the libs where not needed
 	or became outdated. more details in another README file(maybe)
 * the dependecies are not simple to work with.
@@ -18,21 +19,21 @@
 * when working with environments such as conda envions, besure to work with 3.7.x untill notic about tensorflo fedeated is working with 3.7< [beyond]
 * more on conda: anaconda navigator (as of may 2020) will not have tensorflow_federated within the repos,
 	** so any set ups will require you to use your pip terminal/cmd to install TFF
-	*    GIGA recomend just creating your conda environ and then installing TFF first thing, 
-		* this will install normal base tensorflow as well and dependecies (again do this from the envorn terminal if using local IDE)
-		* if you are using google colab you should be fine.
+	*	GIGA: recomend just creating your conda environ and then installing TFF first thing, 
+	* 	this will install normal base tensorflow as well and dependecies (again do this from the envorn terminal if using local IDE)
+	* 	if you are using google colab you should be fine.
 * device names will still work the same on input, but GIGA left the sys.args input as is for the moment(historical raisins)
 
-# changes
-*** lots of refactoring done to move clsoer to an MVC (model view control) methodology.
+## changes
+** lots of refactoring done to move clsoer to an MVC (model view control) framework.
 * the major changes will be for the TFF material, and left the OG (original) file in place for reference.
 
 
-# tensorflow details
-* TFF was chosen as of the genral compatability matched.
+## tensorflow details
+* TFF was chosen as of the genral compatability with exsiting tensorflow implementation.
 * yep.
 
-# pysyft log
+## pysyft log
 * pysyft, as of (May 2020) still does not have a well defined solution with TF.
 * syf-tensorflow is (as of writing this) every young and fresh.
 * the main reason solutions such as TFF and syft are not as popoulat is the need and age
