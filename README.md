@@ -7,6 +7,14 @@ This updated code is intended to run as traditional python code, then updated an
 The end goal is to have a running federed solution that could be brought to the next step if needed.
 Additional goals are to have tools such as docker and K8s or other like solutions. 
 
+developments: 
+the core way that tensorflow federated is intended to work is to send clients, via broad-cast, the expected data and types to be computed.
+
+issues:
+this way does not make a flow of client first easy to approach. this is because you still need a master controller to boradcast controls to 
+the individual clients the information that is required, rather than have the ablity for clients to broadcast to any server that is listening out for
+there specific model. 
+
 ## botnet-traffic-analysis
 
 This is a project for my thesis for IoT botnet traffic analysis *DETECTING, CLASSIFYING AND EXPLAINING IOT BOTNET ATTACKS USING DEEP LEARNING METHODS BASED ON NETWORK DATA*
