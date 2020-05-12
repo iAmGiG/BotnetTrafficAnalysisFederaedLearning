@@ -2,6 +2,8 @@
 # %%
 import sys
 # import os
+from typing import Callable
+
 import pandas as pd
 from glob import iglob
 import numpy as np
@@ -13,6 +15,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 # from tensorflow.keras.optimizers import SGD
 import tensorflow_federated as tff
 import tensorflow as tf
+from tensorflow_federated.python.learning.model_utils import EnhancedModel
 
 reading_type = tff.FederatedType(tf.float64, tff.CLIENTS)
 server_type = tff.FederatedType(tf.float64, tff.SERVER)
@@ -77,7 +80,7 @@ def calculating_threshold(model, top_n_features, x_opt):
 #
 # so need to be able to call this local train function, not directly, but from within a few method, that is the
 # federated computation handler method.
-def train(top_n_features=10):
+def train_fn(top_n_features=10):
     """
     the federated computation is much to the input of the data, not as much as pulling data out of the process.
     this does not appear obvious as the @ may indicate some callable, but this is a strongly type solution to avoid
@@ -124,14 +127,49 @@ def train(top_n_features=10):
     # fitting the model
     model.fit(x_train,
               x_train,
-              epochs=5,
+              epochs=1,
               batch_size=64,
               validation_data=(x_opt, x_opt),
               verbose=1,
               callbacks=[tensorboard]
               )
+    #
+    # fed part
+    # training is represent as a par of computations
+    # one the initialize state
+    # two the single round execution
+    # both can be executed like functions in python.
+    # and when we do they by default execute in a local simulation <------------------important for paper writing
+    # and perform small simulation groups..
+    # the state includes the model and the train data (both of which are above have above)
+    # *at the time of this writing debugging as not begun fully mid May2020*
+    # %%
+    """input_spec: (Optional) a value convertible to `tff.Type` specifying the type
+      of arguments the model expects. Notice this must be a compound structure
+      of two elements, specifying both the data fed into the model to generate
+      predictions, as its first element, as well as the expected type of the
+      ground truth as its second. This argument will become required when we
+      remove `dummy_batch`; currently, exactly one of these two must be
+      specified."""
+    model_fn = lambda: tff.learning.from_keras_model(model, loss="mean_squared_error",
+                                                     input_spec=None,
+                                                     loss_weights=None,
+                                                     metrics=None,
+                                                     dummy_batch=None)
+    client_optimizer_fn = tf.keras.optimizers.SGD()
+    train = tff.learning.build_federated_averaging_process(model_fn, client_optimizer_fn)
+    state = train.initialize()
+    for _ in range(5):
+        state, metrics = train.next(state, x_train)
+        print(metrics.loss)
+    # %%
+    #
+    #
+
     # threshold calculation
     tr = calculating_threshold(model, top_n_features, x_opt)
+    evaluation = tff.learning.build_federated_evaluation(model_fn)
+    metrics = evaluation(state.model, x_opt)
 
     # prediction time, then the comparision of over the threshold, any false_positives,
     x_test_predictions = model.predict(x_test)
@@ -149,6 +187,10 @@ def train(top_n_features=10):
 
 
 # %%
+# so in case of this situation, the server would need the input dimensions, some how, not important now.
+# to have the model_function = lambda: tff.learning.from_keras_model(create_model) as my model line.
+# i need to be able to create it on the server before sending the model to the clients.......
+# yes....i know what this takes.....yep......???????
 def create_model(input_dim):
     autoencoder = Sequential()
     autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)))
@@ -163,6 +205,7 @@ def create_model(input_dim):
 
 
 # %%
+# train = tff.learning.build_federated_averaging_process(train_fn(*sys.argv[1:]))
 if __name__ == '__main__':
-    jput = train(*sys.argv[1:])
+    jput = train_fn(*sys.argv[1:])
     print(jput)
