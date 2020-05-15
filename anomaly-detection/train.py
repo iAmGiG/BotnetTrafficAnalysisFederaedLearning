@@ -152,7 +152,10 @@ def train_fn(top_n_features=10):
       remove `dummy_batch`; currently, exactly one of these two must be
       specified."""
     model_fn = lambda: tff.learning.from_keras_model(model, loss="mean_squared_error",
-                                                     input_spec=None,
+                                                     input_spec=tf.keras.layers.InputSpec(
+                                                         dtype=None, shape=None, ndim=None, max_ndim=None,
+                                                         min_ndim=None, axes=None
+                                                     ),
                                                      loss_weights=None,
                                                      metrics=None,
                                                      dummy_batch=None)
