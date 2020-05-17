@@ -133,7 +133,8 @@ def train_fn(top_n_features=10):
               verbose=1,
               callbacks=[tensorboard]
               )
-    #
+    # %%
+
     # fed part
     # training is represent as a par of computations
     # one the initialize state
@@ -151,14 +152,7 @@ def train_fn(top_n_features=10):
       ground truth as its second. This argument will become required when we
       remove `dummy_batch`; currently, exactly one of these two must be
       specified."""
-    model_fn = lambda: tff.learning.from_keras_model(model, loss="mean_squared_error",
-                                                     input_spec=tf.keras.layers.InputSpec(
-                                                         dtype=None, shape=None, ndim=None, max_ndim=None,
-                                                         min_ndim=None, axes=None
-                                                     ),
-                                                     loss_weights=None,
-                                                     metrics=None,
-                                                     dummy_batch=None)
+    model_fn = model_function(model)
     client_optimizer_fn = tf.keras.optimizers.SGD()
     train = tff.learning.build_federated_averaging_process(model_fn, client_optimizer_fn)
     state = train.initialize()
@@ -187,6 +181,15 @@ def train_fn(top_n_features=10):
     test_size = mse_test.shape[0]
     print(f"{false_positives} false positives on dataset without attacks with size {test_size}")
     return mse_test
+
+
+def model_function(keras_model):
+    model_fn = tff.learning.from_keras_model(keras_model,
+                                             loss=keras_model.loss,
+                                             input_spec=keras_model.input_spec,
+                                             loss_weights=keras_model.loss_weights,
+                                             metrics=keras_model.metrics)
+    return model_fn
 
 
 # %%
