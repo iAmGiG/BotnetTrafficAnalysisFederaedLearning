@@ -133,40 +133,11 @@ def train_fn(top_n_features=10):
               verbose=1,
               callbacks=[tensorboard]
               )
-    # %%
 
-    # fed part
-    # training is represent as a par of computations
-    # one the initialize state
-    # two the single round execution
-    # both can be executed like functions in python.
-    # and when we do they by default execute in a local simulation <------------------important for paper writing
-    # and perform small simulation groups..
-    # the state includes the model and the train data (both of which are above have above)
-    # *at the time of this writing debugging as not begun fully mid May2020*
     # %%
-    """input_spec: (Optional) a value convertible to `tff.Type` specifying the type
-      of arguments the model expects. Notice this must be a compound structure
-      of two elements, specifying both the data fed into the model to generate
-      predictions, as its first element, as well as the expected type of the
-      ground truth as its second. This argument will become required when we
-      remove `dummy_batch`; currently, exactly one of these two must be
-      specified."""
-    model_fn = model_function(model)
-    client_optimizer_fn = tf.keras.optimizers.SGD()
-    train = tff.learning.build_federated_averaging_process(model_fn, client_optimizer_fn)
-    state = train.initialize()
-    for _ in range(5):
-        state, metrics = train.next(state, x_train)
-        print(metrics.loss)
-    # %%
-    #
-    #
 
     # threshold calculation
     tr = calculating_threshold(model, top_n_features, x_opt)
-    evaluation = tff.learning.build_federated_evaluation(model_fn)
-    metrics = evaluation(state.model, x_opt)
 
     # prediction time, then the comparision of over the threshold, any false_positives,
     x_test_predictions = model.predict(x_test)
@@ -180,16 +151,15 @@ def train_fn(top_n_features=10):
     false_positives = sum(over_tr)
     test_size = mse_test.shape[0]
     print(f"{false_positives} false positives on dataset without attacks with size {test_size}")
-    return mse_test
+    return x_train, x_opt, model
 
 
 def model_function(keras_model):
-    model_fn = tff.learning.from_keras_model(keras_model,
-                                             loss=keras_model.loss,
-                                             input_spec=keras_model.input_spec,
-                                             loss_weights=keras_model.loss_weights,
-                                             metrics=keras_model.metrics)
-    return model_fn
+    return tff.learning.from_keras_model(keras_model,
+                                         loss=keras_model.loss,
+                                         input_spec=keras_model.input_spec,
+                                         loss_weights=keras_model.loss_weights,
+                                         metrics=[keras_model.metrics])
 
 
 # %%
@@ -213,5 +183,32 @@ def create_model(input_dim):
 # %%
 # train = tff.learning.build_federated_averaging_process(train_fn(*sys.argv[1:]))
 if __name__ == '__main__':
-    jput = train_fn(*sys.argv[1:])
-    print(jput)
+    x_train, x_opt, model = train_fn(*sys.argv[1:])
+    # %%
+
+    # fed part
+    # training is represent as a par of computations
+    # one the initialize state
+    # two the single round execution
+    # both can be executed like functions in python.
+    # and when we do they by default execute in a local simulation <------------------important for paper writing
+    # and perform small simulation groups..
+    # the state includes the model and the train data (both of which are above have above)
+    # *at the time of this writing debugging as not begun fully mid May2020*
+    """input_spec: (Optional) a value convertible to `tff.Type` specifying the type
+      of arguments the model expects. Notice this must be a compound structure
+      of two elements, specifying both the data fed into the model to generate
+      predictions, as its first element, as well as the expected type of the
+      ground truth as its second. This argument will become required when we
+      remove `dummy_batch`; currently, exactly one of these two must be
+      specified."""
+    model_fn = model_function(model)
+    client_optimizer_fn = tf.keras.optimizers.SGD(0.1)
+    train = tff.learning.build_federated_averaging_process(model_fn, client_optimizer_fn)
+    state = train.initialize()
+    for _ in range(5):
+        state, metrics = train.next(state, x_train)
+        print(metrics.loss)
+
+    evaluation = tff.learning.build_federated_evaluation(model_fn)
+    metrics = evaluation(state.model, x_opt)
