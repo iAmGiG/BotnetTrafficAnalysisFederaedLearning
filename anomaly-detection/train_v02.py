@@ -1,19 +1,26 @@
 #!/usr/bin/python
 # %%
 import sys
-import os
-import pandas as pd
+import functools
+import absl
 from glob import iglob
 import numpy as np
-from keras.models import load_model
+import pandas as pd
+import tensorflow as tf
+# from tensorflow.keras.optimizers import SGD
+import tensorflow_federated as tff
+# from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
-from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential
+FLAGS = absl.flags.FLAGS
 
+reading_type = tff.FederatedType(tf.float32, tff.CLIENTS)
+threshold_type = tff.FederatedType(tf.float32, tff.SERVER)
 
 # %%
+@tff.tf_computation(reading_type)
 def train(top_n_features=10):
     print("Loading combined training data...")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
@@ -90,5 +97,11 @@ def create_model(input_dim):
 
 
 # %%
+@tff.federated_computation(reading_type, threshold_type)
+def main_fn(reading, threshold):
+    return tff.federated_value(train, [reading_type, tff.federated_broadcast(threshold_type)])
+
 if __name__ == '__main__':
-    train(*sys.argv[1:])
+    absl.app.run(main_fn(reading_type, threshold_type))
+    #train(*sys.argv[1:])
+

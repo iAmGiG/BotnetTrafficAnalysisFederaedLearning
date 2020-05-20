@@ -1,16 +1,63 @@
-#!/usr/bin/python
 # %%
+import functools
+from absl import app
+from absl import flags
+from absl import logging
 import sys
 import os
+from typing import Callable
 import pandas as pd
 from glob import iglob
 import numpy as np
-from keras.models import load_model
+import grpc
+# from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
-from tensorflow.keras.optimizers import SGD
+# from tensorflow.keras.optimizers import SGD
+import tensorflow_federated as tff
+import tensorflow as tf
+from tensorflow_federated.python.learning.model_utils import EnhancedModel
+
+FLAGS = flags.FLAGS
+flags.DEFINE_string('host', None, 'The host to connect to.')
+flags.mark_flag_as_required('host')
+flags.DEFINE_string('port', '8000', 'The port to connect to.')
+flags.DEFINE_integer('n_clients', 10, 'Number of clients.')
+flags.DEFINE_integer('n_rounds', 3, 'Number of rounds.')
+NUM_EPOCHS = 10
+BATCH_SIZE = 20
+
+
+# %%
+def make_remote_executor(inferred_cardinalities):
+    """Make remote executor."""
+
+    def create_worker_stack_on(ex):
+        return tff.framework.ReferenceResolvingExecutor(
+            tff.framework.ThreadDelegatingExecutor(ex))
+
+    client_ex = []
+    num_clients = inferred_cardinalities.get(tff.CLIENTS, None)
+    if num_clients:
+        print('Inferred that there are {} clients'.format(num_clients))
+    else:
+        print('No CLIENTS placement provided')
+
+    for _ in range(num_clients or 0):
+        channel = grpc.insecure_channel('{}:{}'.format(FLAGS.host, FLAGS.port))
+        client_ex.append(
+            create_worker_stack_on(
+                tff.framework.RemoteExecutor(channel, rpc_mode='STREAMING')))
+
+    federated_ex = tff.framework.FederatingExecutor({
+        None: create_worker_stack_on(tff.framework.EagerTFExecutor()),
+        tff.SERVER: create_worker_stack_on(tff.framework.EagerTFExecutor()),
+        tff.CLIENTS: client_ex,
+    })
+
+    return tff.framework.ReferenceResolvingExecutor(federated_ex)
 
 
 # %%
@@ -90,5 +137,57 @@ def create_model(input_dim):
 
 
 # %%
+def main(argv):
+    if len(argv) > 1:
+        raise app.UsageError('Too many command-line arguments.')
+
+    warnings.simplefilter('ignore')
+
+    np.random.seed(0)
+
+    emnist_train, _ = tff.simulation.datasets.emnist.load_data()
+
+    sample_clients = emnist_train.client_ids[0:FLAGS.n_clients]
+
+    federated_train_data = make_federated_data(emnist_train, sample_clients)
+
+    example_dataset = emnist_train.create_tf_dataset_for_client(
+        emnist_train.client_ids[0])
+
+    preprocessed_example_dataset = preprocess(example_dataset)
+    input_spec = preprocessed_example_dataset.element_spec
+
+    def model_fn():
+        model = tf.keras.models.Sequential([
+            tf.keras.layers.Input(shape=(784,)),
+            tf.keras.layers.Dense(10, kernel_initializer='zeros'),
+            tf.keras.layers.Softmax(),
+        ])
+        return tff.learning.from_keras_model(
+            model,
+            input_spec=input_spec,
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+            metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
+
+    iterative_process = tff.learning.build_federated_averaging_process(
+        model_fn,
+        client_optimizer_fn=lambda: tf.keras.optimizers.SGD(learning_rate=0.02))
+
+    # Set the default executor to be a RemoteExecutor
+    tff.framework.set_default_executor(
+        tff.framework.create_executor_factory(make_remote_executor))
+
+    state = iterative_process.initialize()
+
+    state, metrics = iterative_process.next(state, federated_train_data)
+    print('round  1, metrics={}'.format(metrics))
+
+    for round_num in range(2, FLAGS.n_rounds + 1):
+        state, metrics = iterative_process.next(state, federated_train_data)
+        print('round {:2d}, metrics={}'.format(round_num, metrics))
+
+
+# %%
 if __name__ == '__main__':
+    tf.compat.v1.enable_v2_behavior()
     train(*sys.argv[1:])
