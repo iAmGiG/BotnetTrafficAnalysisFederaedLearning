@@ -27,6 +27,12 @@ details on training.
 	* 	if you are using google colab you should be fine.
 * device names will still work the same on input, but I left the sys.args input as is for the moment (historical raisins)
 
+** log 5/28/2020: digging through the experiment/research section of tff federated as reveild simulation experiments
+*   this simulation will reflect the intended results of federated learning without the need to set up
+*   an entire product pipeline to run single experiments.
+*   this WILL BE DETAILED in the corresponding implementation as production and simulation are not the same and the intended 
+*   results may differ. 
+
 ## changes
 * lots of refactoring done to move closer to an MVC (model view control) framework.
 * the major changes will be for the TFF material and left the OG (original) file in place for reference.

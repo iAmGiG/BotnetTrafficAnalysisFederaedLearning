@@ -42,3 +42,10 @@
 * the first federated action.
 * the task is then performed on the clients
 * the clients feedback the tff.federated_average
+
+
+# update log:
+* managed to review some test code from the experimental/simulation section.
+* this code will may produce simulation results 
+* see anomaly-detection/simple_fedagv_test_revieing_edit.py 
+* see anomaly-detection/README for details
