@@ -1,7 +1,7 @@
 # This read me details many of the upgrades that have occurred during the implemetnation oftensorflow federated,
 ## includes some details on pysyft-tensorflow and what the end plan is intended to be.
 ### includes running details that have/where updated from the original README in THIS folder.
-* the original README was becomeing data and many updates to the code had to be made.
+* the original README was becoming data and many updates to the code had to be made.
 * terms:
 	* TFF tensorflow_federated
 	* TF tensorflow
