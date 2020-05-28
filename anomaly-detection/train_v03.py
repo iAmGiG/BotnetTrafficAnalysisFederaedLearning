@@ -10,6 +10,8 @@ import pandas as pd
 from glob import iglob
 import numpy as np
 import grpc
+import collections
+import warnings
 # from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Model, Sequential
@@ -18,7 +20,11 @@ from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 # from tensorflow.keras.optimizers import SGD
 import tensorflow_federated as tff
 import tensorflow as tf
+
 from tensorflow_federated.python.learning.model_utils import EnhancedModel
+#from tensorflow_federated.python.simulation
+
+tf.compat.v1.enable_v2_behavior()
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('host', None, 'The host to connect to.')
@@ -28,6 +34,27 @@ flags.DEFINE_integer('n_clients', 10, 'Number of clients.')
 flags.DEFINE_integer('n_rounds', 3, 'Number of rounds.')
 NUM_EPOCHS = 10
 BATCH_SIZE = 20
+
+
+# %%
+
+def preprocess(dataset):
+    def element_fn(element):
+        return collections.OrderedDict([
+            ('x', tf.reshape(element['pixels'], [-1])),
+            ('y', tf.reshape(element['label'], [1])),
+        ])
+
+    return dataset.repeat(NUM_EPOCHS).map(element_fn).batch(BATCH_SIZE)
+
+
+# %%
+
+def make_federated_data(client_data, client_ids):
+    return [
+        preprocess(client_data.create_tf_dataset_for_client(x))
+        for x in client_ids
+    ]
 
 
 # %%
@@ -158,15 +185,10 @@ def main(argv):
     input_spec = preprocessed_example_dataset.element_spec
 
     def model_fn():
-        model = tf.keras.models.Sequential([
-            tf.keras.layers.Input(shape=(784,)),
-            tf.keras.layers.Dense(10, kernel_initializer='zeros'),
-            tf.keras.layers.Softmax(),
-        ])
         return tff.learning.from_keras_model(
-            model,
+            create_model(argv),
             input_spec=input_spec,
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+            loss=tf.keras.losses.MeanSquaredError(),
             metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
     iterative_process = tff.learning.build_federated_averaging_process(
@@ -189,5 +211,5 @@ def main(argv):
 
 # %%
 if __name__ == '__main__':
-    tf.compat.v1.enable_v2_behavior()
-    train(*sys.argv[1:])
+    # train(*sys.argv[1:])
+    app.run(main)
