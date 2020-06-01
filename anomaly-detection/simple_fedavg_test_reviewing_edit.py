@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """End-to-end example testing Federated Averaging against the MNIST model."""
-"""pulled from: experimental file under: 'tensorflow_federated\python\research\simple_fedavg' """
+# """pulled from: experimental file under: 'tensorflow_federated\python\research\simple_fedavg' """
 
 import collections
 import functools
@@ -303,26 +303,53 @@ class ServerTest(tf.test.TestCase):
 
 
 # client testing
+# this class will take in the tf.test.testcase, (some kinda of test case made by tf.test.TestCase)
 #
 class ClientTest(tf.test.TestCase):
 
     def test_self_contained_example(self):
+        """
+        @client_data: uses the method creat client data, see for details
+        @model: retrieves the test model, this will be needed as a way to break down how to design a model for simulation
+        @optimizer_function: is a standard keras optimizer, in this case a stochastic gradient decent
+        @losses: this list appears to be the list to hold all losses from the clients
+        :return: this method never needs to return, it acts as the functional main
+        """
         client_data = create_client_data()
 
         model = MnistModel()
         optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=0.1)
         losses = []
+
+        '''
+        this component is very important for the main simulation running
+        present is a range where range(2) means: the creation of a sequence of numbers between 0 and n (where n = 2)
+        @optimizer pulls in the anonymous function that is only usable in this scope (why not just do this down bellow?)
+        @simple_fedavg_tff._initialize_optimizer_vars(model, optimizer): this comes from the simple_fedavg_tff py
+            (see for details)
+        @server_message: this broadcast message will push out hte model.weights and the round number, 
+            why model_weights?
+            round number: might be the need to know which round for logging
+        @outputs: client update - uses the model, client data, the server message and the optimizer
+        @losses: appends the outputs to the list. model_output converted to numpy()(what this does exactly?)        
+        '''
         for r in range(2):
             optimizer = optimizer_fn()
             simple_fedavg_tff._initialize_optimizer_vars(model, optimizer)
             server_message = simple_fedavg_tf.BroadcastMessage(
                 model_weights=model.weights, round_num=r)
-            outputs = simple_fedavg_tf.client_update(model, client_data(),
-                                                     server_message, optimizer)
+            outputs = simple_fedavg_tf.client_update(model,
+                                                     client_data(),
+                                                     server_message,
+                                                     optimizer)
             losses.append(outputs.model_output.numpy())
-
+        # asserting that the outputs.client_weight.numpy is 2..... need to know why? or not...
         self.assertAllEqual(int(outputs.client_weight.numpy()), 2)
+        # assert that the loss at 1 are less than the loss at 0
         self.assertLess(losses[1], losses[0])
+        # for these assertions they should be to test that all the simulated clients will produce the same results
+        # meaning all assert fails should indicate and error during runtime.
+        # cannot confirm
 
 
 if __name__ == '__main__':
