@@ -275,10 +275,20 @@ def server_init(model, optimizer):
 
 
 # Server testing
-#
+# here the TestCase from tf is being used as a way to generate a common tf test.
 class ServerTest(tf.test.TestCase):
 
     def _assert_server_update_with_all_ones(self, model_fn):
+        """
+        @model_function: a param function that is used to define the expected model on the server.
+        @optimizer_fn: a stocastic gradient decent optimizer function.
+        @state: an initial server state, made up of the model and optimizer
+        @weights_delta: a map_structure,
+            tf.ones_llike - "Creates a tensor of all ones that has the same shape as the input."
+            model.trainable_variables - variables.weights and self._variables.bias - see above define locally.
+        :param model_fn:
+        :return:
+        """
         optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=0.1)
         model = model_fn()
         optimizer = optimizer_fn()
@@ -286,10 +296,18 @@ class ServerTest(tf.test.TestCase):
         weights_delta = tf.nest.map_structure(tf.ones_like,
                                               model.trainable_variables)
 
+        """
+        @ '_' : indicates a through away variable
+        @ range from 0 - 2
+        the state on each run will update with the new model, optimizer, state, weights_delta
+        """
         for _ in range(2):
             state = simple_fedavg_tf.server_update(model, optimizer, state,
                                                    weights_delta)
-
+        '''
+        this will "Evaluates tensors and returns numpy values."
+        
+        '''
         model_vars = self.evaluate(state.model_weights)
         train_vars = model_vars.trainable
         self.assertLen(train_vars, 2)

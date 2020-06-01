@@ -32,6 +32,8 @@ details on training.
 *   an entire product pipeline to run single experiments.
 *   this WILL BE DETAILED in the corresponding implementation as production and simulation are not the same and the intended 
 *   results may differ. 
+*   TO MAIN NOTE THIS: this code is marked as an unit test, as it runs as a unit test callable to quick answer what its doing
+
 
 ** log 6/1/2020: class ClientTest(tf.test.TestCase):
 *  tf.test.TestCase: """Base class for tests that need to test TensorFlow.""" as per doc
