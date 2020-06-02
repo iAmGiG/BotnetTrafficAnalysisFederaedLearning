@@ -24,7 +24,7 @@ details on training.
 	* so, any set ups will require you to use your pip terminal/cmd to install TFF
 	*	I recommend just creating your conda environment(s) and then installing TFF first thing, 
 	* 	this will install normal base tensorflow as well and dependencies (again do this from the environ terminal if using local IDE)
-	* 	if you are using google colab you should be fine.
+	* 	if you are using google co-lab you should be fine.
 * device names will still work the same on input, but I left the sys.args input as is for the moment (historical raisins)
 
 ** log 5/28/2020: digging through the experiment/research section of tff federated as revealed simulation experiments

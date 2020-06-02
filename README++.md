@@ -48,4 +48,4 @@
 * managed to review some test code from the experimental/simulation section.
 * this code will may produce simulation results 
 * see anomaly-detection/simple_fedagv_test_revieing_edit.py 
-* see anomaly-detection/README for details
+* see anomaly-detection/README++ for details

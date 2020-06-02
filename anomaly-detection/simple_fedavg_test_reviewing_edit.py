@@ -200,9 +200,18 @@ def create_client_data():
     return client_data
 
 
+# unit test:
+#
 class SimpleFedAvgTest(tf.test.TestCase):
 
     def test_something(self):
+        """
+        @it_precess: is a federated averaging process, note the inputs for build fed avg process, we are given the
+            option to build that process with any server/client optimizer via anonymous functions, this way the passing
+            of custom optimizer is fluid.
+        @fed_data_type: the parameter of the next in the iterative process through its type signature.
+        :return:
+        """
         it_process = simple_fedavg_tff.build_federated_averaging_process(_model_fn)
         self.assertIsInstance(it_process, tff.templates.IterativeProcess)
         federated_data_type = it_process.next.type_signature.parameter[1]
@@ -255,8 +264,7 @@ class SimpleFedAvgTest(tf.test.TestCase):
         self.assertLess(losses[1], losses[0])
 
 
-# defining server initializer
-#
+# helper function
 def server_init(model, optimizer):
     """Returns initial `ServerState`.
 
@@ -322,7 +330,6 @@ class ServerTest(tf.test.TestCase):
 
 # client testing
 # this class will take in the tf.test.testcase, (some kinda of test case made by tf.test.TestCase)
-#
 class ClientTest(tf.test.TestCase):
 
     def test_self_contained_example(self):
