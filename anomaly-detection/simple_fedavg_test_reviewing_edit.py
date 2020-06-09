@@ -1,4 +1,3 @@
-# Lint as: python3
 # Copyright 2020, The TensorFlow Federated Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """End-to-end example testing Federated Averaging against the MNIST model."""
-# """pulled from: experimental file under: 'tensorflow_federated\python\research\simple_fedavg' """
 
 import collections
 import functools
@@ -46,8 +44,6 @@ def _create_test_cnn_model(only_digits=True):
         conv2d(filters=32, input_shape=input_shape),
         max_pool(),
         tf.keras.layers.Flatten(),
-        # tf.keras.layers.Dense(10 if only_digits else 62),
-        # tf.keras.layers.Activation(tf.nn.softmax),
         tf.keras.layers.Dense(int(0.75 * 10), activation="tanh", input_shape=(10,)),
         tf.keras.layers.Dense(int(0.5 * 10), activation="tanh"),
         tf.keras.layers.Dense(int(0.33 * 10), activation="tanh"),
@@ -121,8 +117,6 @@ def get_local_mnist_metrics(variables):
         accuracy=variables.accuracy_sum / variables.num_examples)
 
 
-# core on what to study
-# here a return is done, rather then the main creation of a computation being sent....
 @tff.federated_computation
 def aggregate_mnist_metrics_across_clients(metrics):
     return collections.OrderedDict(
@@ -173,7 +167,6 @@ class MnistModel(tff.learning.Model):
     def report_local_outputs(self):
         return get_local_mnist_metrics(self._variables)
 
-    # this property has the ability to call tff.fed_computations....
     @property
     def federated_output_computation(self):
         return aggregate_mnist_metrics_across_clients
@@ -200,18 +193,9 @@ def create_client_data():
     return client_data
 
 
-# unit test:
-#
 class SimpleFedAvgTest(tf.test.TestCase):
 
     def test_something(self):
-        """
-        @it_precess: is a federated averaging process, note the inputs for build fed avg process, we are given the
-            option to build that process with any server/client optimizer via anonymous functions, this way the passing
-            of custom optimizer is fluid.
-        @fed_data_type: the parameter of the next in the iterative process through its type signature.
-        :return:
-        """
         it_process = simple_fedavg_tff.build_federated_averaging_process(_model_fn)
         self.assertIsInstance(it_process, tff.templates.IterativeProcess)
         federated_data_type = it_process.next.type_signature.parameter[1]
@@ -263,8 +247,19 @@ class SimpleFedAvgTest(tf.test.TestCase):
             losses.append(loss)
         self.assertLess(losses[1], losses[0])
 
+    def test_keras_evaluate(self):
+        keras_model = _create_test_cnn_model()
+        sample_data = [
+            collections.OrderedDict(
+                x=np.ones([1, 28, 28, 1], dtype=np.float32),
+                y=np.ones([1], dtype=np.int32))
+        ]
+        metric = tf.keras.metrics.SparseCategoricalAccuracy()
+        accuracy = simple_fedavg_tf.keras_evaluate(keras_model, sample_data, metric)
+        self.assertIsInstance(accuracy, tf.Tensor)
+        self.assertBetween(accuracy, 0.0, 1.0)
 
-# helper function
+
 def server_init(model, optimizer):
     """Returns initial `ServerState`.
 
@@ -282,21 +277,9 @@ def server_init(model, optimizer):
         round_num=0)
 
 
-# Server testing
-# here the TestCase from tf is being used as a way to generate a common tf test.
 class ServerTest(tf.test.TestCase):
 
     def _assert_server_update_with_all_ones(self, model_fn):
-        """
-        @model_function: a param function that is used to define the expected model on the server.
-        @optimizer_fn: a stocastic gradient decent optimizer function.
-        @state: an initial server state, made up of the model and optimizer
-        @weights_delta: a map_structure,
-            tf.ones_llike - "Creates a tensor of all ones that has the same shape as the input."
-            model.trainable_variables - variables.weights and self._variables.bias - see above define locally.
-        :param model_fn:
-        :return:
-        """
         optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=0.1)
         model = model_fn()
         optimizer = optimizer_fn()
@@ -304,18 +287,10 @@ class ServerTest(tf.test.TestCase):
         weights_delta = tf.nest.map_structure(tf.ones_like,
                                               model.trainable_variables)
 
-        """
-        @ '_' : indicates a through away variable
-        @ range from 0 - 2
-        the state on each run will update with the new model, optimizer, state, weights_delta
-        """
         for _ in range(2):
             state = simple_fedavg_tf.server_update(model, optimizer, state,
                                                    weights_delta)
-        '''
-        this will "Evaluates tensors and returns numpy values."
-        
-        '''
+
         model_vars = self.evaluate(state.model_weights)
         train_vars = model_vars.trainable
         self.assertLen(train_vars, 2)
@@ -328,55 +303,27 @@ class ServerTest(tf.test.TestCase):
         self._assert_server_update_with_all_ones(MnistModel)
 
 
-# client testing
-# this class will take in the tf.test.testcase, (some kinda of test case made by tf.test.TestCase)
 class ClientTest(tf.test.TestCase):
 
     def test_self_contained_example(self):
-        """
-        @client_data: uses the method creat client data, see for details
-        @model: retrieves the test model, this will be needed as a way to break down how to design a model for simulation
-        @optimizer_function: is a standard keras optimizer, in this case a stochastic gradient decent
-        @losses: this list appears to be the list to hold all losses from the clients
-        :return: this method never needs to return, it acts as the functional main
-        """
         client_data = create_client_data()
 
         model = MnistModel()
         optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=0.1)
         losses = []
-
-        '''
-        this component is very important for the main simulation running
-        present is a range where range(2) means: the creation of a sequence of numbers between 0 and n (where n = 2)
-        @optimizer pulls in the anonymous function that is only usable in this scope (why not just do this down bellow?)
-        @simple_fedavg_tff._initialize_optimizer_vars(model, optimizer): this comes from the simple_fedavg_tff py
-            (see for details)
-        @server_message: this broadcast message will push out hte model.weights and the round number, 
-            why model_weights?
-            round number: might be the need to know which round for logging
-        @outputs: client update - uses the model, client data, the server message and the optimizer
-        @losses: appends the outputs to the list. model_output converted to numpy()(what this does exactly?)        
-        '''
         for r in range(2):
             optimizer = optimizer_fn()
             simple_fedavg_tff._initialize_optimizer_vars(model, optimizer)
             server_message = simple_fedavg_tf.BroadcastMessage(
                 model_weights=model.weights, round_num=r)
-            outputs = simple_fedavg_tf.client_update(model,
-                                                     client_data(),
-                                                     server_message,
-                                                     optimizer)
+            outputs = simple_fedavg_tf.client_update(model, client_data(),
+                                                     server_message, optimizer)
             losses.append(outputs.model_output.numpy())
-        # asserting that the outputs.client_weight.numpy is 2..... need to know why? or not...
+
         self.assertAllEqual(int(outputs.client_weight.numpy()), 2)
-        # assert that the loss at 1 are less than the loss at 0
         self.assertLess(losses[1], losses[0])
-        # for these assertions they should be to test that all the simulated clients will produce the same results
-        # meaning all assert fails should indicate and error during runtime.
-        # cannot confirm
+
 
 
 if __name__ == '__main__':
-    tf.compat.v1.enable_v2_behavior()
     tf.test.main()

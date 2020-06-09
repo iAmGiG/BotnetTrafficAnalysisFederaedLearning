@@ -60,7 +60,7 @@ details on training.
         @outputs: client update - uses the model, client data, the server message and the optimizer
         @losses: appends the outputs to the list. model_output converted to numpy()(what this does exactly?)        
     '''
-    * the optimizer is retrieved from the anonymous function optimzier_fun().
+    * the optimizer is retrieved from the anonymous function optimizer_fn().
     * the server message would appear to send the model_weights and the round number, this from the client perspective
     * helps with logging and aggregation.
     * the output .....
