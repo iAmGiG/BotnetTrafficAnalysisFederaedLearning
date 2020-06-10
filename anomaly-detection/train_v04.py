@@ -186,12 +186,13 @@ def create_model(input_dim):
     autoencoder.add(Dense(input_dim))
     return autoencoder
 
-def model_builder(input_dim):
+
+def model_builder(input_dim, input_spec):
     model = create_model(input_dim)
     return tff.learning.from_keras_model(keras_model=model,
                                          loss="mean_squared_error",
-                                         input_spec=model.input_spec,
-                                         metrics=[model.metrics]
+                                         input_spec=input_spec,
+                                         metrics=[tf.keras.metrics.SparseCategoricalAccuracy()]
                                          )
 
 
@@ -204,22 +205,35 @@ def train_main(sysarg=10):
 
     example_set = emnist_train.create_tf_dataset_for_client()
     df = get_train_data(sysarg)
-    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
+    x_train, x_opt, x_test = np.split(df.sample(frac=1,
+                                                random_state=17),
+                                      [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
 
+    input_spec = tf.nest.map_structure(lambda x: tf.TensorSpec(x.shape, x.dtype), df)
     assing_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
 
+    # iterative process
     iterative_process = tff.learning.build_federated_averaging_process(
-
+        model_fn=model_builder(input_dim=sysarg,
+                               input_spec=input_spec),
+        client_optimizer_fn= ,
+        server_optimizer_fn= ,
+        stateful_delta_aggregate_fn=,
+        stateful_model_broadcast_fn=
     )
+    iterative_process = compression_process_adapter.CompressionProcessAdapter(iterative_process)
 
+    # client dataset function
     client_db_fn = training_utils.build_client_datasets_fn(
         train_dataset=x_train,
         train_clients_per_round=FLAGS.clients_per_round)
 
+    # evaluation function
     eval_fn = training_utils.build_evaluate_fn(
         eval_dataset=x_test
     )
 
+    # training loop
     training_loop.run(
         iterative_process=iterative_process,
         client_datasets_fn=client_db_fn,
