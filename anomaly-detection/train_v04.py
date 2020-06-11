@@ -25,6 +25,12 @@ from tensorflow_federated.python.research.compression import compression_process
 with utils_impl.record_new_flags() as hparam_flags:
     utils_impl.define_optimizer_flags('server')
     utils_impl.define_optimizer_flags('client')
+    flags.DEFINE_integer('clients_per_round', 2,
+                         'How many clients to sample per round.')
+    flags.DEFINE_integer('client_epochs_per_round', 1,
+                         'Number of epochs in the client to take per round.')
+    flags.DEFINE_integer('client_batch_size', 20,
+                         'Batch size used on the client.')
 
 FLAGS = flags.FLAGS
 
@@ -161,15 +167,6 @@ def exceeds_threshold_fn(mse_test, tr):
 
 
 # %%
-def model_function(keras_model):
-    return tff.learning.from_keras_model(keras_model,
-                                         loss=keras_model.loss,
-                                         input_spec=keras_model.input_spec,
-                                         loss_weights=keras_model.loss_weights,
-                                         metrics=[keras_model.metrics])
-
-
-# %%
 # so in case of this situation, the server would need the input dimensions, some how, not important now.
 # to have the model_function = lambda: tff.learning.from_keras_model(create_model) as my model line.
 # i need to be able to create it on the server before sending the model to the clients.......
@@ -187,41 +184,72 @@ def create_model(input_dim):
     return autoencoder
 
 
+# %%
 def model_builder(input_dim, input_spec):
     model = create_model(input_dim)
     return tff.learning.from_keras_model(keras_model=model,
                                          loss="mean_squared_error",
                                          input_spec=input_spec,
-                                         metrics=[tf.keras.metrics.SparseCategoricalAccuracy()]
+                                         metrics=[tf.keras.metrics.Accuracy()]
                                          )
 
 
 # %%
 def train_main(sysarg=10):
-    emnist_train, emnist_test = dataset.get_emnist_datasets(
-        FLAGS.client_batch_size,
-        FLAGS.client_epochs_per_round,
-        only_digits=FLAGS.only_digits)
+    # emnist_train, emnist_test = dataset.get_emnist_datasets(
+    #    FLAGS.client_batch_size,
+    #    FLAGS.client_epochs_per_round,
+    #    only_digits=FLAGS.only_digits)
 
-    example_set = emnist_train.create_tf_dataset_for_client()
+    # example_set = emnist_train.create_tf_dataset_for_client()
+
+    #
+    # These are the attempts to use the custom data set for this experiment
+    # begin
     df = get_train_data(sysarg)
     x_train, x_opt, x_test = np.split(df.sample(frac=1,
                                                 random_state=17),
                                       [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
 
-    input_spec = tf.nest.map_structure(lambda x: tf.TensorSpec(x.shape, x.dtype), df)
-    assing_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
+    x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
+    # will look into moving this into its own method if successful
+    # end
+    #
 
+    # defining the input spec
+    input_spec = tf.nest.map_structure(tf.TensorSpec.from_tensor, tf.convert_to_tensor(x_train))
+
+    # an assign weight function
+    assign_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
+
+    #
+    # the client/server optimizer functions
+    #
+    client_optimizer_fn = functools.partial(
+        utils_impl.create_optimizer_from_flags, 'client')
+    server_optimizer_fn = functools.partial(
+        utils_impl.create_optimizer_from_flags, 'server')
+    #
+    #
+    #
+
+    # defines the iterative process, takes a model function, a client optimizer,
+    # server optimizer delta aggregate and model broadcast function
     # iterative process
+    # will need to look into stateful_delta_agg func and stateful model broadcast fn going forward.
+    # begin
     iterative_process = tff.learning.build_federated_averaging_process(
         model_fn=model_builder(input_dim=sysarg,
                                input_spec=input_spec),
-        client_optimizer_fn= ,
-        server_optimizer_fn= ,
-        stateful_delta_aggregate_fn=,
-        stateful_model_broadcast_fn=
+        client_optimizer_fn=client_optimizer_fn,
+        server_optimizer_fn=server_optimizer_fn,
+        stateful_delta_aggregate_fn=None,
+        stateful_model_broadcast_fn=None
     )
     iterative_process = compression_process_adapter.CompressionProcessAdapter(iterative_process)
+    #
+    # end
+    #
 
     # client dataset function
     client_db_fn = training_utils.build_client_datasets_fn(
@@ -230,7 +258,11 @@ def train_main(sysarg=10):
 
     # evaluation function
     eval_fn = training_utils.build_evaluate_fn(
-        eval_dataset=x_test
+        eval_dataset=x_test,
+        model_builder=create_model(sysarg),
+        loss_builder=tf.keras.losses.MeanSquaredError(),
+        metrics_builder=[tf.keras.metrics.Accuracy()],
+        assign_weights_to_keras_model=assign_weights_fn
     )
 
     # training loop

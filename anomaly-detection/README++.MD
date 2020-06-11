@@ -76,6 +76,22 @@ details on training.
 * lots of refactoring done to move closer to an MVC (model view control) framework.
 * the major changes will be for the TFF material and left the OG (original) file in place for reference.
 
+### usable flags (not all work with all experiments)
+--experiment_name=temp
+--client_optimizer=sgd
+--client_learning_rate=0.2
+--server_optimizer=sgd
+--server_learning_rate=1.0
+--use_compression=True
+--broadcast_quantization_bits=8
+--aggregation_quantization_bits=8
+--use_sparsity_in_aggregation=True
+--total_rounds=200
+--rounds_per_eval=1
+--rounds_per_checkpoint=50
+--rounds_per_profile=0
+--root_output_dir=B:/projects/openProjects/githubprojects/BotnetTrafficAnalysisFederaedLearning/anomaly-detection/logs/fed_out/
+
 
 ## tensorflow details
 * TFF was chosen as of the general compatibility with existing tensorflow implementation.
