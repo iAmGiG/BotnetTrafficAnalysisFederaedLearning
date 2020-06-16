@@ -3,7 +3,8 @@
 import sys
 from glob import iglob
 import functools
-
+import os
+from collections.abc import Callable
 from absl import app
 from absl import flags
 import numpy as np
@@ -40,9 +41,13 @@ def get_train_data(top_n_features=10):
     print("Loading combined training data...")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
     fisher = pd.read_csv('../fisher.csv')
+    y_train = []
+    with open("../data/labels.txt", 'r') as labels:
+        for lines in labels:
+            y_train.append(lines.rstrip())
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
-    return df
+    return df, y_train
 
 
 # %%
@@ -98,7 +103,7 @@ def train_fn(top_n_features=10):
     :param top_n_features:
     :return:
     """
-    df = get_train_data(top_n_features)
+    df, y_train = get_train_data(top_n_features)
     # split randomly shuffled data into 3 equal parts
     # this need reevaluation for a real time state one day.
     # what does the data look like split up across a real time state?
@@ -172,26 +177,36 @@ def exceeds_threshold_fn(mse_test, tr):
 # i need to be able to create it on the server before sending the model to the clients.......
 # yes....i know what this takes.....yep......???????
 def create_model(input_dim):
-    autoencoder = Sequential()
-    autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)))
-    autoencoder.add(Dense(int(0.5 * input_dim), activation="tanh"))
-    autoencoder.add(Dense(int(0.33 * input_dim), activation="tanh"))
-    autoencoder.add(Dense(int(0.25 * input_dim), activation="tanh"))
-    autoencoder.add(Dense(int(0.33 * input_dim), activation="tanh"))
-    autoencoder.add(Dense(int(0.5 * input_dim), activation="tanh"))
-    autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh"))
-    autoencoder.add(Dense(input_dim))
+    autoencoder = Sequential([
+        tf.keras.layers.Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)),
+        tf.keras.layers.Dense(int(0.5 * input_dim), activation="tanh"),
+        tf.keras.layers.Dense(int(0.33 * input_dim), activation="tanh"),
+        tf.keras.layers.Dense(int(0.25 * input_dim), activation="tanh"),
+        tf.keras.layers.Dense(int(0.33 * input_dim), activation="tanh"),
+        tf.keras.layers.Dense(int(0.5 * input_dim), activation="tanh"),
+        tf.keras.layers.Dense(int(0.75 * input_dim), activation="tanh"),
+        tf.keras.layers.Dense(input_dim)
+    ])
+    # autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)))
+    # autoencoder.add(Dense(int(0.5 * input_dim), activation="tanh"))
+    # autoencoder.add(Dense(int(0.33 * input_dim), activation="tanh"))
+    # autoencoder.add(Dense(int(0.25 * input_dim), activation="tanh"))
+    # autoencoder.add(Dense(int(0.33 * input_dim), activation="tanh"))
+    # autoencoder.add(Dense(int(0.5 * input_dim), activation="tanh"))
+    # autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh"))
+    # autoencoder.add(Dense(input_dim))
     return autoencoder
 
 
 # %%
 def model_builder(input_dim, input_spec):
     model = create_model(input_dim)
-    return tff.learning.from_keras_model(keras_model=model,
-                                         loss="mean_squared_error",
-                                         input_spec=input_spec,
-                                         metrics=[tf.keras.metrics.Accuracy()]
-                                         )
+    return tff.learning.from_keras_model(
+        keras_model=model,
+        loss=tf.keras.losses.MeanSquaredError(),
+        input_spec=input_spec,
+        metrics=[tf.keras.metrics.Accuracy()],
+    )
 
 
 # %%
@@ -206,7 +221,7 @@ def train_main(sysarg=10):
     #
     # These are the attempts to use the custom data set for this experiment
     # begin
-    df = get_train_data(sysarg)
+    df, y_train = get_train_data(sysarg)
     x_train, x_opt, x_test = np.split(df.sample(frac=1,
                                                 random_state=17),
                                       [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
@@ -217,8 +232,9 @@ def train_main(sysarg=10):
     #
 
     # defining the input spec
-    input_spec = tf.nest.map_structure(tf.TensorSpec.from_tensor, tf.convert_to_tensor(x_train))
-
+    input_spec = tf.nest.map_structure(tf.TensorSpec.from_tensor,
+                                       [tf.convert_to_tensor(x_train),
+                                        tf.convert_to_tensor(y_train)])
     # an assign weight function
     assign_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
 
@@ -239,12 +255,11 @@ def train_main(sysarg=10):
     # will need to look into stateful_delta_agg func and stateful model broadcast fn going forward.
     # begin
     iterative_process = tff.learning.build_federated_averaging_process(
-        model_fn=model_builder(input_dim=sysarg,
-                               input_spec=input_spec),
+        model_fn=functools.partial(model_builder,
+                                   input_dim=sysarg,
+                                   input_spec=input_spec),
         client_optimizer_fn=client_optimizer_fn,
         server_optimizer_fn=server_optimizer_fn,
-        stateful_delta_aggregate_fn=None,
-        stateful_model_broadcast_fn=None
     )
     iterative_process = compression_process_adapter.CompressionProcessAdapter(iterative_process)
     #
