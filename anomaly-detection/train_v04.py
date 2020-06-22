@@ -233,8 +233,8 @@ def train_main(sysarg=10):
 
     # defining the input spec
     input_spec = tf.nest.map_structure(tf.TensorSpec.from_tensor,
-                                       [tf.convert_to_tensor(x_train),
-                                        tf.convert_to_tensor(y_train)])
+                                       (tf.convert_to_tensor(x_train),
+                                        tf.convert_to_tensor(y_train)))
     # an assign weight function
     assign_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
 
