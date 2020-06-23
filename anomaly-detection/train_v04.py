@@ -22,6 +22,8 @@ from tensorflow_federated.python.research.utils import training_utils
 from tensorflow_federated.python.research.utils import utils_impl
 from tensorflow_federated.python.research.optimization.emnist import dataset
 from tensorflow_federated.python.research.compression import compression_process_adapter
+from tensorflow_federated.python.research.compression import sparsity
+from tensorflow_model_optimization.python.core.internal import tensor_encoding as te
 
 with utils_impl.record_new_flags() as hparam_flags:
     utils_impl.define_optimizer_flags('server')
@@ -32,6 +34,11 @@ with utils_impl.record_new_flags() as hparam_flags:
                          'Number of epochs in the client to take per round.')
     flags.DEFINE_integer('client_batch_size', 20,
                          'Batch size used on the client.')
+    flags.DEFINE_boolean('use_compression', False,
+                         'Whether to use compression code path.')
+    flags.DEFINE_boolean('use_sparsity_in_aggregation', False,
+                         'Whether to add sparsity to the aggregation. This will '
+                         'only be used for client to server compression.')
 
 FLAGS = flags.FLAGS
 
@@ -208,32 +215,89 @@ def model_builder(input_dim, input_spec):
         metrics=[tf.keras.metrics.Accuracy()],
     )
 
+def _broadcast_encoder_fn(value):
+    """Function for building encoded broadcast.
+
+    This method decides, based on the tensor size, whether to use lossy
+    compression or keep it as is (use identity encoder). The motivation for this
+    pattern is due to the fact that compression of small model weights can provide
+    only negligible benefit, while at the same time, lossy compression of small
+    weights usually results in larger impact on model's accuracy.
+
+    Args:
+      value: A tensor or variable to be encoded in server to client communication.
+
+    Returns:
+      A `te.core.SimpleEncoder`.
+    """
+    # TODO(b/131681951): We cannot use .from_tensor(...) because it does not
+    # currently support Variables.
+    spec = tf.TensorSpec(value.shape, value.dtype)
+    if value.shape.num_elements() > 10000:
+        return te.encoders.as_simple_encoder(
+            te.encoders.uniform_quantization(FLAGS.broadcast_quantization_bits),
+            spec)
+    else:
+        return te.encoders.as_simple_encoder(te.encoders.identity(), spec)
+
+
+def _mean_encoder_fn(value):
+    """Function for building encoded mean.
+
+    This method decides, based on the tensor size, whether to use lossy
+    compression or keep it as is (use identity encoder). The motivation for this
+    pattern is due to the fact that compression of small model weights can provide
+    only negligible benefit, while at the same time, lossy compression of small
+    weights usually results in larger impact on model's accuracy.
+
+    Args:
+      value: A tensor or variable to be encoded in client to server communication.
+
+    Returns:
+      A `te.core.GatherEncoder`.
+    """
+    # TODO(b/131681951): We cannot use .from_tensor(...) because it does not
+    # currently support Variables.
+    spec = tf.TensorSpec(value.shape, value.dtype)
+    if value.shape.num_elements() > 10000:
+        if FLAGS.use_sparsity_in_aggregation:
+            return te.encoders.as_gather_encoder(
+                sparsity.sparse_quantizing_encoder(
+                    FLAGS.aggregation_quantization_bits), spec)
+        else:
+            return te.encoders.as_gather_encoder(
+                te.encoders.uniform_quantization(FLAGS.aggregation_quantization_bits),
+                spec)
+    else:
+        return te.encoders.as_gather_encoder(te.encoders.identity(), spec)
+
+
 
 # %%
 def train_main(sysarg=10):
-    # emnist_train, emnist_test = dataset.get_emnist_datasets(
-    #    FLAGS.client_batch_size,
-    #    FLAGS.client_epochs_per_round,
-    #    only_digits=FLAGS.only_digits)
+    emnist_train, emnist_test = dataset.get_emnist_datasets(
+        FLAGS.client_batch_size,
+        FLAGS.client_epochs_per_round,
+        only_digits=FLAGS.only_digits)
 
-    # example_set = emnist_train.create_tf_dataset_for_client()
+    example_dataset = emnist_train.create_tf_dataset_for_client(
+        emnist_train.client_ids[0])
+    input_spec = example_dataset.element_spec
 
     #
     # These are the attempts to use the custom data set for this experiment
     # begin
-    df, y_train = get_train_data(sysarg)
-    x_train, x_opt, x_test = np.split(df.sample(frac=1,
-                                                random_state=17),
-                                      [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
+    # df, y_train = get_train_data(sysarg)
+    # x_train, x_opt, x_test = np.split(df.sample(frac=1,random_state=17),[int(1 / 3 * len(df)), int(2 / 3 * len(df))])
 
-    x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
+    # x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
     # will look into moving this into its own method if successful
     # end
     #
 
     # defining the input spec
-    input_spec = tf.nest.map_structure(tf.RaggedTensor.from_tensor,
-                                       (tf.ragged.constant(x_train), tf.ragged.constant(y_train)))
+    # input_spec = tf.nest.map_structure(tf.RaggedTensor.from_tensor,
+    # (tf.ragged.constant(x_train), tf.ragged.constant(y_train)))
     # an assign weight function
     assign_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
 
@@ -245,6 +309,20 @@ def train_main(sysarg=10):
     server_optimizer_fn = functools.partial(
         utils_impl.create_optimizer_from_flags, 'server')
     #
+    if FLAGS.use_compression:
+        # We create a `StatefulBroadcastFn` and `StatefulAggregateFn` by providing
+        # the `_broadcast_encoder_fn` and `_mean_encoder_fn` to corresponding
+        # utilities. The fns are called once for each of the model weights created
+        # by tff_model_fn, and return instances of appropriate encoders.
+        encoded_broadcast_fn = (
+            tff.learning.framework.build_encoded_broadcast_from_model(
+                functools.partial(model_builder,
+                                  input_dim=sysarg,
+                                  input_spec=input_spec), _broadcast_encoder_fn))
+        encoded_mean_fn = tff.learning.framework.build_encoded_mean_from_model(
+            functools.partial(model_builder,
+                              input_dim=sysarg,
+                              input_spec=input_spec), _mean_encoder_fn)
 
     # defines the iterative process, takes a model function, a client optimizer,
     # server optimizer delta aggregate and model broadcast function
@@ -257,6 +335,8 @@ def train_main(sysarg=10):
                                    input_spec=input_spec),
         client_optimizer_fn=client_optimizer_fn,
         server_optimizer_fn=server_optimizer_fn,
+        stateful_delta_aggregate_fn=encoded_mean_fn,
+        stateful_model_broadcast_fn=encoded_broadcast_fn
     )
     iterative_process = compression_process_adapter.CompressionProcessAdapter(iterative_process)
     #
@@ -265,12 +345,12 @@ def train_main(sysarg=10):
 
     # client dataset function
     client_db_fn = training_utils.build_client_datasets_fn(
-        train_dataset=x_train,
+        train_dataset=emnist_train,
         train_clients_per_round=FLAGS.clients_per_round)
 
     # evaluation function
     eval_fn = training_utils.build_evaluate_fn(
-        eval_dataset=x_test,
+        eval_dataset=emnist_test,
         model_builder=create_model(sysarg),
         loss_builder=tf.keras.losses.MeanSquaredError(),
         metrics_builder=[tf.keras.metrics.Accuracy()],
@@ -281,23 +361,21 @@ def train_main(sysarg=10):
     training_loop.run(
         iterative_process=iterative_process,
         client_datasets_fn=client_db_fn,
-        evaluate_fn=eval_fn
+        validation_fn=eval_fn
     )
 
+    # %%
+    def main(argv):
+        if len(argv) > 2:
+            raise app.UsageError('Expected one command-line argument(s), '
+                                 'got: {}'.format(argv))
 
-# %%
-def main(argv):
-    if len(argv) > 2:
-        raise app.UsageError('Expected one command-line argument(s), '
-                             'got: {}'.format(argv))
+        tff.framework.set_default_executor(
+            tff.framework.local_executor_factory(max_fanout=25))
+        train_main()
+        # train_fn(*sys.argv[1:])
 
-    tff.framework.set_default_executor(
-        tff.framework.local_executor_factory(max_fanout=25))
-    train_main()
-    # train_fn(*sys.argv[1:])
-
-
-# %%
-# train = tff.learning.build_federated_averaging_process(train_fn(*sys.argv[1:]))
-if __name__ == '__main__':
-    app.run(main)
+    # %%
+    # train = tff.learning.build_federated_averaging_process(train_fn(*sys.argv[1:]))
+    if __name__ == '__main__':
+        app.run(main)
