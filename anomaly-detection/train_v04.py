@@ -232,9 +232,8 @@ def train_main(sysarg=10):
     #
 
     # defining the input spec
-    input_spec = tf.nest.map_structure(tf.TensorSpec.from_tensor,
-                                       (tf.convert_to_tensor(x_train),
-                                        tf.convert_to_tensor(y_train)))
+    input_spec = tf.nest.map_structure(tf.RaggedTensor.from_tensor,
+                                       (tf.ragged.constant(x_train), tf.ragged.constant(y_train)))
     # an assign weight function
     assign_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
 
@@ -245,8 +244,6 @@ def train_main(sysarg=10):
         utils_impl.create_optimizer_from_flags, 'client')
     server_optimizer_fn = functools.partial(
         utils_impl.create_optimizer_from_flags, 'server')
-    #
-    #
     #
 
     # defines the iterative process, takes a model function, a client optimizer,
