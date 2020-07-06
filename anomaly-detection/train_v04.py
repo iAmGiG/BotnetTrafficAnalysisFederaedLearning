@@ -23,6 +23,7 @@ from tensorflow_federated.python.research.utils import utils_impl
 from tensorflow_federated.python.research.optimization.emnist import dataset
 from tensorflow_federated.python.research.compression import compression_process_adapter
 
+tf.executing_eagerly()
 with utils_impl.record_new_flags() as hparam_flags:
     utils_impl.define_optimizer_flags('server')
     utils_impl.define_optimizer_flags('client')
@@ -32,6 +33,10 @@ with utils_impl.record_new_flags() as hparam_flags:
                          'Number of epochs in the client to take per round.')
     flags.DEFINE_integer('client_batch_size', 20,
                          'Batch size used on the client.')
+    flags.DEFINE_boolean(
+        'only_digits', True, 'Whether to use the digit-only '
+                             'EMNIST dataset (10 characters) or the extended EMNIST '
+                             'dataset (62 characters).')
 
 FLAGS = flags.FLAGS
 
@@ -177,15 +182,30 @@ def exceeds_threshold_fn(mse_test, tr):
 # i need to be able to create it on the server before sending the model to the clients.......
 # yes....i know what this takes.....yep......???????
 def create_model(input_dim):
+    conv2d = functools.partial(tf.keras.layers.Conv2D,
+                               kernel_size=5,
+                               padding='same',
+                               data_format='channels_last',
+                               activation=tf.nn.tanh)
+    max_pool = functools.partial(
+        tf.keras.layers.MaxPooling2D,
+        pool_size=(2, 2),
+        padding='same',
+        data_format='channels_last')
     autoencoder = Sequential([
-        tf.keras.layers.Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)),
-        tf.keras.layers.Dense(int(0.5 * input_dim), activation="tanh"),
-        tf.keras.layers.Dense(int(0.33 * input_dim), activation="tanh"),
-        tf.keras.layers.Dense(int(0.25 * input_dim), activation="tanh"),
-        tf.keras.layers.Dense(int(0.33 * input_dim), activation="tanh"),
-        tf.keras.layers.Dense(int(0.5 * input_dim), activation="tanh"),
-        tf.keras.layers.Dense(int(0.75 * input_dim), activation="tanh"),
-        tf.keras.layers.Dense(input_dim)
+        conv2d(filters=32, input_shape=(28, 28, 1)),
+        max_pool(),
+        conv2d(filters=64),
+        max_pool(),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(int(0.75 * input_dim), activation=tf.nn.tanh),
+        tf.keras.layers.Dense(int(0.5 * input_dim), activation=tf.nn.tanh),
+        tf.keras.layers.Dense(int(0.33 * input_dim), activation=tf.nn.tanh),
+        tf.keras.layers.Dense(int(0.25 * input_dim), activation=tf.nn.tanh),
+        tf.keras.layers.Dense(int(0.33 * input_dim), activation=tf.nn.tanh),
+        tf.keras.layers.Dense(int(0.5 * input_dim), activation=tf.nn.tanh),
+        tf.keras.layers.Dense(int(0.75 * input_dim), activation=tf.nn.tanh),
+        tf.keras.layers.Dense(input_dim),
     ])
     # autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)))
     # autoencoder.add(Dense(int(0.5 * input_dim), activation="tanh"))
@@ -211,30 +231,30 @@ def model_builder(input_dim, input_spec):
 
 # %%
 def train_main(sysarg=10):
-    # emnist_train, emnist_test = dataset.get_emnist_datasets(
-    #    FLAGS.client_batch_size,
-    #    FLAGS.client_epochs_per_round,
-    #    only_digits=FLAGS.only_digits)
+    emnist_train, emnist_test = dataset.get_emnist_datasets(
+        FLAGS.client_batch_size,
+        FLAGS.client_epochs_per_round,
+        only_digits=FLAGS.only_digits)
 
-    # example_set = emnist_train.create_tf_dataset_for_client()
+    example_dataset = emnist_train.create_tf_dataset_for_client(
+        emnist_train.client_ids[0])
+    input_spec = example_dataset.element_spec
 
-    #
     # These are the attempts to use the custom data set for this experiment
     # begin
-    df, y_train = get_train_data(sysarg)
-    x_train, x_opt, x_test = np.split(df.sample(frac=1,
-                                                random_state=17),
-                                      [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
+    # df, y_train = get_train_data(sysarg)
+    # x_train, x_opt, x_test = np.split(df.sample(frac=1,random_state=17),[int(1 / 3 * len(df)), int(2 / 3 * len(df))])
 
-    x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
+    # x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
     # will look into moving this into its own method if successful
     # end
-    #
 
     # defining the input spec
-    input_spec = tf.nest.map_structure(tf.TensorSpec.from_tensor,
-                                       [tf.convert_to_tensor(x_train),
-                                        tf.convert_to_tensor(y_train)])
+    # x_train = tf.data.Dataset.from_tensor_slices([x_train, y_train])
+    # input_spec = x_train.batch(FLAGS.client_batch_size).element_spec
+    # tf.nest.map_structure(tf.TensorSpec.from_tensor,
+    #                              [tf.convert_to_tensor(x_train),
+    #                              tf.convert_to_tensor(y_train)])
     # an assign weight function
     assign_weights_fn = compression_process_adapter.CompressionServerState.assign_weights_to_keras_model
 
@@ -245,8 +265,6 @@ def train_main(sysarg=10):
         utils_impl.create_optimizer_from_flags, 'client')
     server_optimizer_fn = functools.partial(
         utils_impl.create_optimizer_from_flags, 'server')
-    #
-    #
     #
 
     # defines the iterative process, takes a model function, a client optimizer,
@@ -268,12 +286,12 @@ def train_main(sysarg=10):
 
     # client dataset function
     client_db_fn = training_utils.build_client_datasets_fn(
-        train_dataset=x_train,
+        train_dataset=emnist_train,
         train_clients_per_round=FLAGS.clients_per_round)
 
     # evaluation function
     eval_fn = training_utils.build_evaluate_fn(
-        eval_dataset=x_test,
+        eval_dataset=emnist_test,
         model_builder=create_model(sysarg),
         loss_builder=tf.keras.losses.MeanSquaredError(),
         metrics_builder=[tf.keras.metrics.Accuracy()],

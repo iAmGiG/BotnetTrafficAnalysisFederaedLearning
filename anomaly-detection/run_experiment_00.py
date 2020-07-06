@@ -152,7 +152,7 @@ def run_experiment():
         FLAGS.client_batch_size,
         FLAGS.client_epochs_per_round,
         only_digits=FLAGS.only_digits)
-    tf.data.Dataset
+
     example_dataset = emnist_train.create_tf_dataset_for_client(
         emnist_train.client_ids[0])
     input_spec = example_dataset.element_spec
