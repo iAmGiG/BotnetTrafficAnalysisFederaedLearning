@@ -12,9 +12,14 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import sklearn
 from glob import iglob
+import syft as sy
 
 # %%
 REBUILD_DATA = False  # set to true to one once, then back to false unless you want to change something in your training data.
+
+
+hook = sy.TorchHook(torch)
+v_hook = sy.VirtualWorker(hook=hook, id="v")
 
 
 # %%
@@ -29,7 +34,7 @@ def get_train_data(top_n_features=10):
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
     # return df, y_train
-    return df
+    return df, top_n_features
 
 
 # %%
@@ -43,39 +48,74 @@ def create_scalar(x_opt, x_test, x_train):
 
 
 # %%
-def train(net, x_train, x_opt, BATCH_SIZE, EPOCHS):
+def train(net, x_train, x_opt, BATCH_SIZE, EPOCHS, input_dim):
+    outputs = 0
+    mse = 0
     optimizer = optim.SGD(net.parameters(), lr=0.001)
     loss_function = nn.MSELoss()
+    loss = 0
+    batch_y = 0
+
     for epoch in range(EPOCHS):
-        for i in tqdm(range(0, len(x_train),
-                            BATCH_SIZE)):  # from 0, to the len of x, stepping BATCH_SIZE at a time. [:50] ..for now just to dev
-            # print(f"{i}:{i+BATCH_SIZE}")
-            batch_X = x_train[i:i + BATCH_SIZE]
+        for i in tqdm(range(0, len(x_train), BATCH_SIZE)):
+            # batch_x = x_train[i:i + BATCH_SIZE]
+            # batch_x = x_train.view(i, BATCH_SIZE)
+            # print("bx", batch_x.size())
+
             batch_y = x_opt[i:i + BATCH_SIZE]
-
+            # batch_y = x_train.view(-1, 784)
+            # print("by", batch_y.size())
             net.zero_grad()
+            # batch_x.view(batch_y.shape[0])
+            outputs = net(batch_y)
+            # print('out', outputs)
 
-            outputs = net(batch_X)
             loss = loss_function(outputs, batch_y)
             loss.backward()
             optimizer.step()  # Does the update
 
         print(f"Epoch: {epoch}. Loss: {loss}")
+        # print("opt", x_opt.size(), "output", outputs.__sizeof__())
+
+    return np.mean(np.power(batch_y.data.numpy() - outputs.data.numpy(), 2), axis=1)
 
 
 # %%
-def test(net, x_test):
+def cal_threshold(mse):
+    # mse = np.mean(np.power(loss_val.real, 2), axis=1)
+    print("mean is %.5f" % mse.mean())
+    print("min is %.5f" % mse.min())
+    print("max is %.5f" % mse.max())
+    print("std is %.5f" % mse.std())
+
+    tr = mse.mean() + mse.std()
+    with open(f'threshold_{input_dim}', 'w') as t:
+        t.write(str(tr))
+    print(f"Calculated threshold is {tr}")
+    return tr
+
+
+# %%
+def test(net, x_test, tr):
     correct = 0
     total = 0
-    with torch.no_grad():
-        for i in tqdm(range(len(x_test))):
-            real_class = torch.argmax(x_test[i])
-            net_out = net(x_test[i])
-            predicted_class = torch.argmax(net_out)
-            if predicted_class == real_class:
-                correct += 1
-            total += 1
-    print("Accuracy: ", round(correct / total, 3))
+    x_test_predictions = net(x_test)
+    print("Calculating MSE on test set...")
+    mse_test = np.mean(np.power(x_test.data.numpy() - x_test_predictions.data.numpy(), 2), axis=1)
+    over_tr = mse_test > tr
+    false_positives = sum(over_tr)
+    test_size = mse_test.shape[0]
+    print(f"{false_positives} false positives on dataset without attacks with size {test_size}")
+
+    #with torch.no_grad():
+    #    for i in tqdm(range(len(x_test))):
+    #        real_class = torch.argmax(x_test[i])
+    #        net_out = net(x_test[i])
+    #        predicted_class = torch.argmax(net_out)
+    #        if predicted_class == real_class:
+    #            correct += 1
+    #        total += 1
+    # print("Accuracy: ", round(correct / total, 3))
 
 
 # %%
@@ -100,35 +140,36 @@ class Net(nn.Module):
         x = torch.tanh(self.fc6(x))
         x = torch.tanh(self.fc7(x))
         x = self.fc8(x)
+        return torch.softmax(x, dim=1)
 
 
 # %%
 net = Net(*sys.argv[1:])
 
 # %%
-training_data = get_train_data(*sys.argv[1:])
-x_train, x_opt, x_test = np.split(training_data.sample(frac=1, random_state=17),
+training_data, input_dim = get_train_data(*sys.argv[1:])
+x_train, x_opt, x_test = np.split(training_data.sample(frac=1, random_state=1),
                                   [int(1 / 3 * len(training_data)),
                                    int(2 / 3 * len(training_data))])
-
-scaler = StandardScaler()
-scaler = scaler.fit(x_train.append(x_opt))
-x_train = scaler.transform(x_train)
-x_opt = scaler.transform(x_opt)
-x_test = scaler.transform(x_test)
-
-# %%
-# X = torch.Tensor([i[0] for in i in training_data])
-# y = torch.Tensor([i[1] for in i in training_data])
 
 # %%
 x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
 
 # %%
 BATCH_SIZE = 100
-EPOCHS = 12
+EPOCHS = 2
 
 # %%
-train(net, x_train, x_opt, BATCH_SIZE, EPOCHS)
+mse = train(net,
+            torch.from_numpy(x_train).float(),
+            torch.from_numpy(x_opt).float(),
+            BATCH_SIZE,
+            EPOCHS,
+            input_dim=input_dim)
+
+tr = cal_threshold(mse=mse)
+print(tr)
+
 # %%
-test(net, x_test)
+test(net,
+     torch.from_numpy(x_test).float(), tr=1)
