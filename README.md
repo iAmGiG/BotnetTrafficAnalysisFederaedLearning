@@ -1,31 +1,42 @@
 # fork: Botnet Traffic Analysis Federaed Learning
-This fork is intended to implement a federed learning into this existing code, as apart of the Graduate research Assistant work. 
-The origianl implementation is not fully uptodate with the latest versions of the imported libraries.
-Some of the main goals include updateding the original code to include current versions of the import Libs as well as adjust for changes required to implement a federed learning solution. 
-Federated learning is to have a distibution of the intended processing rather than data gathering to a centeralized solution. 
-This updated code is intended to run as traditional python code, then updated any notebook files as needed.
-The end goal is to have a running federed solution that could be brought to the next step if needed.
-Additional goals are to have tools such as docker and K8s or other like solutions. 
+This fork is a Graduate Research Assistant project to implement federated learning into the existing codebase. The original implementation is not fully up-to-date with the latest versions of the imported libraries. The primary goals of this project are to update the codebase to include current versions of the imported libraries and to make the necessary adjustments to enable federated learning.
 
-developments: 
-the core way that tensorflow federated is intended to work is to send clients, via broad-cast, the expected data and types to be computed.
-## the distibuted aggregation protocol - in tff think of this like a fucntion - inputs live on the clients outputs live on the server.
-### we can give it a functional type signature. 
+Federated learning is a distributed approach to machine learning that avoids centralized data gathering by distributing the processing across multiple devices. This updated codebase is intended to run as traditional Python code and can be used to update any associated notebook files.
 
-issues:
-this way does not make a flow of client first easy to approach. this is because you still need a master controller to boradcast controls to 
-the individual clients the information that is required, rather than have the ablity for clients to broadcast to any server that is listening out for
-there specific model. 
+The end goal of this project is to have a running federated solution that can be advanced to the next stage if needed. In addition, this project aims to provide tools like Docker and K8s or other solutions to make it easier to deploy and manage the federated solution.
+
+If you have any questions or feedback, please feel free to get in touch.``` 
+
+Some of the changes I made include:
+
+- Simplifying some of the wording for clarity
+- Using shorter sentences to make the text easier to read
+- Rearranging some of the information for better flow and emphasis
+- Removing redundant language
+
+
+Developments:
+TensorFlow Federated is designed to operate by broadcasting the expected data and types to clients for computation. 
+This approach is implemented using the Distributed Aggregation Protocol, which is like a function where inputs are sent from clients and outputs are generated on the server. 
+We can provide a functional type signature for this protocol to specify the expected inputs and outputs.
+
+Issues:
+One limitation of the current approach is that it can be challenging to manage the flow of clients since a master controller is still needed to broadcast control signals to individual clients regarding the required information. 
+It would be preferable to have clients able to broadcast to any server that is listening for their specific model without the need for a central controller. 
+This approach would provide greater flexibility and make it easier to manage clients, but it presents its own set of challenges, including security concerns and data privacy. 
 
 
 ## botnet-traffic-analysis
 
 This is a project for my thesis for IoT botnet traffic analysis *DETECTING, CLASSIFYING AND EXPLAINING IOT BOTNET ATTACKS USING DEEP LEARNING METHODS BASED ON NETWORK DATA*
 
-Abstract:
+## Abstract:
 
-The growing adoption of Internet-of-Things devices brings with it the increased participation of said devices in botnet attacks, and as such novel methods for IoT botnet attack detection are needed. This work demonstrates that deep learning models can be used to detect and classify IoT botnet attacks based on network data in a device agnostic way and that it can be more accurate than some more traditional machine learning methods, especially without feature selection. Furthermore, this works shows that the opaqueness of deep learning models can mitigated to some degree with Local Interpretable Model-Agnostic Explanations technique.
-
+With the growing prevalence of Internet-of-Things (IoT) devices, botnet attacks have become an increasingly significant threat. 
+To counter this, novel methods for IoT botnet attack detection are required. 
+This work demonstrates that deep learning models can be used to detect and classify IoT botnet attacks based on network data in a device-agnostic manner. 
+It shows that deep learning models can be more accurate than traditional machine learning methods, especially without feature selection. Additionally, 
+  this work demonstrates that the opaqueness of deep learning models can be mitigated to some degree using the Local Interpretable Model-Agnostic Explanations (LIME) technique.
 ----------------------
 
 It additionally attempts to reproduce results from this paper https://arxiv.org/abs/1805.03409
