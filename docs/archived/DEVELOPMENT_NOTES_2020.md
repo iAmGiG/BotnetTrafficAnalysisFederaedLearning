@@ -36,12 +36,14 @@ From my original understanding in 2020:
 ### Federated Learning Outline
 
 **Training is represented as a pair of computations:**
+
 1. Initialize state
 2. Single round execution
 
 Both can be executed like functions in Python, and **when we do, they by default execute in a local simulation** ← **IMPORTANT for paper writing**
 
 **The state includes:**
+
 * The model
 * The training data
 
@@ -83,6 +85,7 @@ Analyzed `tf.test.TestCase`: *"Base class for tests that need to test TensorFlow
 **Method analyzed**: `ClientTest.test_self_contained_example(self)`
 
 Components:
+
 * `@client_data`: Uses the method `create_client_data`
 * `@model`: Retrieves the test model (needed to design a model for simulation)
 * `@optimizer_function`: Standard keras optimizer (stochastic gradient descent)
@@ -90,6 +93,7 @@ Components:
 * Returns nothing - acts as the functional main
 
 **The critical for loop**:
+
 ```python
 for r in range(2):  # Creates sequence of numbers between 0 and n (where n=2)
     optimizer = optimizer_fn()  # Anonymous function usable only in this scope
@@ -100,6 +104,7 @@ for r in range(2):  # Creates sequence of numbers between 0 and n (where n=2)
 ```
 
 **Why these components?**
+
 * **model_weights**: For aggregation
 * **round number**: Needed for logging
 * **optimizer from anonymous function**: Keeps value in local memory, accessible only in that scope
@@ -147,6 +152,7 @@ for r in range(2):  # Creates sequence of numbers between 0 and n (where n=2)
 **Conda environment recommendation**: Work with Python 3.7.x until notice about TensorFlow Federated working with 3.8+
 
 **Anaconda Navigator (as of May 2020)**: Will not have `tensorflow_federated` within the repos
+
 * Any setups will require you to use your pip terminal/cmd to install TFF
 * Recommendation: Create your conda environment, then install TFF first thing
 * This will install normal base TensorFlow as well and dependencies
@@ -163,6 +169,7 @@ for r in range(2):  # Creates sequence of numbers between 0 and n (where n=2)
 **TFF was chosen** due to general compatibility with existing TensorFlow implementation.
 
 **PySyft analysis (May 2020)**:
+
 * PySyft, as of May 2020, still does not have a well-defined solution with TensorFlow
 * `syft-tensorflow` is (as of writing this) very young and fresh - not enough examples to learn from effectively
 * However, this may change sooner as updates appear to be frequent enough
@@ -193,6 +200,7 @@ for r in range(2):  # Creates sequence of numbers between 0 and n (where n=2)
 ## Files Referenced
 
 Original draft files (now consolidated here):
+
 * `README++.md` (root) - General FL concepts and update log
 * `anomaly-detection/README++.MD` - Detailed TFF implementation notes
 * `classification/README++.md` - Empty placeholder

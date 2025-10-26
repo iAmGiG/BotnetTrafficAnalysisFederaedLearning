@@ -9,16 +9,19 @@ The primary goal was to convert a centralized deep learning approach (anomaly de
 ## Files Overview
 
 ### `tff_initial_attempt.py` (formerly `train_v00.py`) - Initial TFF Simulation Attempt
+
 **Date**: ~May 2020
 **Status**: Experimental / Non-functional
 **Approach**: First attempt at using TensorFlow Federated's simulation API
 
 **What it tried**:
+
 - Basic TFF client-server broadcasting model
 - Attempted to use `tff.learning.build_federated_averaging_process()`
 - Struggled with data format conversion for TFF compatibility
 
 **Why it was abandoned**:
+
 - Complexity of TFF API for the use case
 - Data preprocessing challenges for federated context
 - Simulation-only approach didn't align with intended deployment
@@ -26,16 +29,19 @@ The primary goal was to convert a centralized deep learning approach (anomaly de
 ---
 
 ### `manual_fedavg_attempt.py` (formerly `train_v01.py`) - Simplified Federation Approach
+
 **Date**: ~May 2020
 **Status**: Partial implementation
 **Approach**: Attempted manual implementation of FedAvg without full TFF framework
 
 **What it tried**:
+
 - Manual implementation of Federated Averaging (FedAvg)
 - Simpler client-server architecture
 - Per-device model training with aggregation
 
 **Why it was abandoned**:
+
 - Reinventing the wheel (duplicating TFF functionality)
 - Aggregation logic became complex
 - Moved back to TFF approach in later versions
@@ -43,16 +49,19 @@ The primary goal was to convert a centralized deep learning approach (anomaly de
 ---
 
 ### `pysyft_exploration.py` (formerly `train_v02.py`) - PySyft Exploration
+
 **Date**: ~May-June 2020
 **Status**: Non-functional / Abandoned
 **Approach**: Attempted to use PySyft library for federated learning
 
 **What it tried**:
+
 - Import `syft` and `syft_tensorflow`
 - TensorFlow + PySyft integration
 - Privacy-preserving federated learning
 
 **Why it was abandoned**:
+
 - PySyft-TensorFlow integration was immature in 2020
 - Documentation and examples were scarce
 - API instability and compatibility issues
@@ -63,16 +72,19 @@ The primary goal was to convert a centralized deep learning approach (anomaly de
 ---
 
 ### `tff_refinement.py` (formerly `train_v03.py`) - TFF Refinement Attempt
+
 **Date**: ~June 2020
 **Status**: Partial implementation
 **Approach**: Refined TFF approach with better data handling
 
 **What it tried**:
+
 - Improved TFF client data preparation
 - Better separation of client datasets
 - Attempted to fix TFF type signature issues
 
 **Why it was abandoned**:
+
 - Still struggled with TFF complexity
 - Simulation limitations became apparent
 - Performance issues with multiple clients
@@ -80,11 +92,13 @@ The primary goal was to convert a centralized deep learning approach (anomaly de
 ---
 
 ### `tff_reference_example.py` (formerly `simple_fedavg_test_reviewing_edit.py`) - Reference Implementation
+
 **Date**: June 2020
 **Status**: Reference code (pulled from TFF examples)
 **Approach**: Unmodified/lightly modified example from TensorFlow Federated research section
 
 **What it is**:
+
 - Clean FedAvg implementation from TFF experimental examples
 - Intended as reference for understanding TFF patterns
 - Not directly integrated into project
@@ -99,6 +113,7 @@ This file was pulled for study but never adapted for the botnet detection use ca
 ## What Actually Worked
 
 The working federated learning implementation is in:
+
 - **`../../../anomaly-detection/train_v04.py`** - Latest iteration (June 2020)
 - **`../../../anomaly-detection/run_experiment_00.py`** - Experimental runner
 - **`../../../anomaly-detection/run_experiment_01.py`** - With compression techniques
@@ -117,7 +132,7 @@ These files in the main `anomaly-detection/` directory represent the "best effor
 
 ## Evolution Timeline
 
-```
+```bash
 tff_initial_attempt.py (Initial TFF)
     ↓
 manual_fedavg_attempt.py (Manual FedAvg)
@@ -131,14 +146,15 @@ train_v04.py (Working implementation - kept in main directory)
 
 ## References
 
-- **TensorFlow Federated**: https://www.tensorflow.org/federated
+- **TensorFlow Federated**: <https://www.tensorflow.org/federated>
 - **PySyft Research**: `../../PYSYFT_RESEARCH.md`
 - **Research Notes**: `../../../anomaly-detection/README++.MD`
-- **Published Paper**: https://www.sciencedirect.com/science/article/pii/S2666827022000081
+- **Published Paper**: <https://www.sciencedirect.com/science/article/pii/S2666827022000081>
 
 ## Why These Are Archived
 
 These files are preserved for:
+
 - **Research transparency**: Showing the iterative development process
 - **Future reference**: Documenting what approaches were tried and why they failed
 - **Portfolio context**: Demonstrating problem-solving evolution

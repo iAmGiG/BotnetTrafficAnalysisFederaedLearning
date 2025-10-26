@@ -33,7 +33,8 @@ def get_positives_on_dataset_without_attacks(inner_put):
 # %%
 def get_train_data(top_n_features=10):
     print("Loading combined training data...")
-    df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
+    df = pd.concat((pd.read_csv(f) for f in iglob(
+        '../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
     fisher = pd.read_csv('../fisher.csv')
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
@@ -100,7 +101,8 @@ def train_fn(top_n_features=10):
     # split randomly shuffled data into 3 equal parts
     # this need reevaluation for a real time state one day.
     # what does the data look like split up across a real time state?
-    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
+    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [
+                                      int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     # craft scalar
     x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
     # create the model from the top features
@@ -180,7 +182,8 @@ def model_function(keras_model):
 # yes....i know what this takes.....yep......???????
 def create_model(input_dim):
     autoencoder = Sequential()
-    autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)))
+    autoencoder.add(Dense(int(0.75 * input_dim),
+                    activation="tanh", input_shape=(input_dim,)))
     autoencoder.add(Dense(int(0.5 * input_dim), activation="tanh"))
     autoencoder.add(Dense(int(0.33 * input_dim), activation="tanh"))
     autoencoder.add(Dense(int(0.25 * input_dim), activation="tanh"))

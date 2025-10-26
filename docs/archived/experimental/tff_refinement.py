@@ -22,7 +22,7 @@ import tensorflow_federated as tff
 import tensorflow as tf
 
 from tensorflow_federated.python.learning.model_utils import EnhancedModel
-#from tensorflow_federated.python.simulation
+# from tensorflow_federated.python.simulation
 
 tf.compat.v1.enable_v2_behavior()
 
@@ -90,13 +90,15 @@ def make_remote_executor(inferred_cardinalities):
 # %%
 def train(top_n_features=10):
     print("Loading combined training data...")
-    df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
+    df = pd.concat((pd.read_csv(f) for f in iglob(
+        '../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
 
     fisher = pd.read_csv('../fisher.csv')
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
     # split randomly shuffled data into 3 equal parts
-    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
+    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [
+                                      int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     scaler = StandardScaler()
     scaler.fit(x_train.append(x_opt))
     x_train = scaler.transform(x_train)
@@ -152,7 +154,8 @@ def train(top_n_features=10):
 # %%
 def create_model(input_dim):
     autoencoder = Sequential()
-    autoencoder.add(Dense(int(0.75 * input_dim), activation="tanh", input_shape=(input_dim,)))
+    autoencoder.add(Dense(int(0.75 * input_dim),
+                    activation="tanh", input_shape=(input_dim,)))
     autoencoder.add(Dense(int(0.5 * input_dim), activation="tanh"))
     autoencoder.add(Dense(int(0.33 * input_dim), activation="tanh"))
     autoencoder.add(Dense(int(0.25 * input_dim), activation="tanh"))

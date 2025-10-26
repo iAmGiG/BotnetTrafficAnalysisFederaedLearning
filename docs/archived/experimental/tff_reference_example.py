@@ -44,7 +44,8 @@ def _create_test_cnn_model(only_digits=True):
         conv2d(filters=32, input_shape=input_shape),
         max_pool(),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(int(0.75 * 10), activation="tanh", input_shape=(10,)),
+        tf.keras.layers.Dense(
+            int(0.75 * 10), activation="tanh", input_shape=(10,)),
         tf.keras.layers.Dense(int(0.5 * 10), activation="tanh"),
         tf.keras.layers.Dense(int(0.33 * 10), activation="tanh"),
         tf.keras.layers.Dense(int(0.25 * 10), activation="tanh"),
@@ -92,7 +93,8 @@ def create_mnist_variables():
 
 
 def mnist_forward_pass(variables, batch):
-    y = tf.nn.softmax(tf.matmul(batch['x'], variables.weights) + variables.bias)
+    y = tf.nn.softmax(
+        tf.matmul(batch['x'], variables.weights) + variables.bias)
     predictions = tf.cast(tf.argmax(y, 1), tf.int32)
 
     flat_labels = tf.reshape(batch['y'], [-1])
@@ -196,7 +198,8 @@ def create_client_data():
 class SimpleFedAvgTest(tf.test.TestCase):
 
     def test_something(self):
-        it_process = simple_fedavg_tff.build_federated_averaging_process(_model_fn)
+        it_process = simple_fedavg_tff.build_federated_averaging_process(
+            _model_fn)
         self.assertIsInstance(it_process, tff.templates.IterativeProcess)
         federated_data_type = it_process.next.type_signature.parameter[1]
         self.assertEqual(
@@ -204,9 +207,11 @@ class SimpleFedAvgTest(tf.test.TestCase):
             '{<x=float32[?,28,28,1],y=int32[?]>*}@CLIENTS')
 
     def test_simple_training(self):
-        it_process = simple_fedavg_tff.build_federated_averaging_process(_model_fn)
+        it_process = simple_fedavg_tff.build_federated_averaging_process(
+            _model_fn)
         server_state = it_process.initialize()
-        Batch = collections.namedtuple('Batch', ['x', 'y'])  # pylint: disable=invalid-name
+        Batch = collections.namedtuple(
+            'Batch', ['x', 'y'])  # pylint: disable=invalid-name
 
         # Test out manually setting weights:
         keras_model = _create_test_cnn_model(only_digits=True)
@@ -238,7 +243,8 @@ class SimpleFedAvgTest(tf.test.TestCase):
         client_data = create_client_data()
         train_data = [client_data()]
 
-        trainer = simple_fedavg_tff.build_federated_averaging_process(MnistModel)
+        trainer = simple_fedavg_tff.build_federated_averaging_process(
+            MnistModel)
         state = trainer.initialize()
         losses = []
         for _ in range(2):
@@ -255,7 +261,8 @@ class SimpleFedAvgTest(tf.test.TestCase):
                 y=np.ones([1], dtype=np.int32))
         ]
         metric = tf.keras.metrics.SparseCategoricalAccuracy()
-        accuracy = simple_fedavg_tf.keras_evaluate(keras_model, sample_data, metric)
+        accuracy = simple_fedavg_tf.keras_evaluate(
+            keras_model, sample_data, metric)
         self.assertIsInstance(accuracy, tf.Tensor)
         self.assertBetween(accuracy, 0.0, 1.0)
 
@@ -280,7 +287,7 @@ def server_init(model, optimizer):
 class ServerTest(tf.test.TestCase):
 
     def _assert_server_update_with_all_ones(self, model_fn):
-        optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=0.1)
+        def optimizer_fn(): return tf.keras.optimizers.SGD(learning_rate=0.1)
         model = model_fn()
         optimizer = optimizer_fn()
         state = server_init(model, optimizer)
@@ -297,7 +304,8 @@ class ServerTest(tf.test.TestCase):
         self.assertEqual(state.round_num, 2)
         # weights are initialized with all-zeros, weights_delta is all ones,
         # SGD learning rate is 0.1. Updating server for 2 steps.
-        self.assertAllClose(train_vars, [np.ones_like(v) * 0.2 for v in train_vars])
+        self.assertAllClose(
+            train_vars, [np.ones_like(v) * 0.2 for v in train_vars])
 
     def test_self_contained_example_custom_model(self):
         self._assert_server_update_with_all_ones(MnistModel)
@@ -309,7 +317,7 @@ class ClientTest(tf.test.TestCase):
         client_data = create_client_data()
 
         model = MnistModel()
-        optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=0.1)
+        def optimizer_fn(): return tf.keras.optimizers.SGD(learning_rate=0.1)
         losses = []
         for r in range(2):
             optimizer = optimizer_fn()
@@ -322,7 +330,6 @@ class ClientTest(tf.test.TestCase):
 
         self.assertAllEqual(int(outputs.client_weight.numpy()), 2)
         self.assertLess(losses[1], losses[0])
-
 
 
 if __name__ == '__main__':
