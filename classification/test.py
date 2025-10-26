@@ -11,9 +11,11 @@ from sklearn.model_selection import train_test_split
 import lime
 import lime.lime_tabular
 
+
 def test(num_features, model_name):
     df = train.load_data()
     test_with_data(num_features, model_name, df)
+
 
 def test_with_data(num_features, model_name, df):
     X = df.drop(columns=['class'])
@@ -24,7 +26,8 @@ def test_with_data(num_features, model_name, df):
     Y = pd.get_dummies(df['class'])
     classes = Y.columns.tolist()
     print('Splitting data')
-    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(
+        X, Y, test_size=0.2, random_state=42)
     scaler = StandardScaler()
     print('Transforming data')
     scaler.fit(x_train)
@@ -45,14 +48,17 @@ def test_with_data(num_features, model_name, df):
     print(cnf_matrix)
 
     print('Explaining data using lime')
-    explainer = lime.lime_tabular.LimeTabularExplainer(x_train.values, feature_names=X.columns.tolist(), class_names=classes, discretize_continuous=True)
+    explainer = lime.lime_tabular.LimeTabularExplainer(
+        x_train.values, feature_names=X.columns.tolist(), class_names=classes, discretize_continuous=True)
     for j in range(10):
         i = np.random.randint(0, x_test.shape[0])
         print(f'Explaining for record nr {i}')
-        exp = explainer.explain_instance(x_test.values[i], wrapper.scale_predict, num_features=int(num_features), top_labels=5)
+        exp = explainer.explain_instance(
+            x_test.values[i], wrapper.scale_predict, num_features=int(num_features), top_labels=5)
         exp.save_to_file(f'lime/explanation{j}.html')
         print(y_test.values[i])
         print(exp.as_list())
+
 
 class ModelWrapper:
     def __init__(self, model, scaler):
@@ -62,6 +68,7 @@ class ModelWrapper:
     def scale_predict(self, x):
         x = self.scaler.transform(x)
         return self.model.predict(x)
+
 
 if __name__ == '__main__':
     test(*sys.argv[1:])

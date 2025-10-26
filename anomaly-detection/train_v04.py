@@ -44,7 +44,8 @@ FLAGS = flags.FLAGS
 # %%
 def get_train_data(top_n_features=10):
     print("Loading combined training data...")
-    df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
+    df = pd.concat((pd.read_csv(f) for f in iglob(
+        '../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
     fisher = pd.read_csv('../data/fisher/fisher.csv')
     y_train = []
     with open("../data/labels.txt", 'r') as labels:
@@ -112,7 +113,8 @@ def train_fn(top_n_features=10):
     # split randomly shuffled data into 3 equal parts
     # this need reevaluation for a real time state one day.
     # what does the data look like split up across a real time state?
-    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
+    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [
+                                      int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     # craft scalar
     x_train, x_opt, x_test = create_scalar(x_opt, x_test, x_train)
     # create the model from the top features
@@ -279,7 +281,8 @@ def train_main(sysarg=10):
         client_optimizer_fn=client_optimizer_fn,
         server_optimizer_fn=server_optimizer_fn,
     )
-    iterative_process = compression_process_adapter.CompressionProcessAdapter(iterative_process)
+    iterative_process = compression_process_adapter.CompressionProcessAdapter(
+        iterative_process)
     #
     # end
     #

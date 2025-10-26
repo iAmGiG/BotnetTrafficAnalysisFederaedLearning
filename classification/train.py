@@ -20,38 +20,45 @@ from sklearn.model_selection import train_test_split
 def load_data():
     print('Loading data')
     print('Loading gafgyt data')
-    df_gafgyt = pd.concat((pd.read_csv(f) for f in iglob('../data/**/gafgyt_attacks/*.csv', recursive=True)), ignore_index=True)
+    df_gafgyt = pd.concat((pd.read_csv(f) for f in iglob(
+        '../data/**/gafgyt_attacks/*.csv', recursive=True)), ignore_index=True)
     print('Loaded, shape: ')
     print(df_gafgyt.shape)
     df_gafgyt['class'] = 'gafgyt'
     print('Loading mirai data')
-    df_mirai = pd.concat((pd.read_csv(f) for f in iglob('../data/**/mirai_attacks/*.csv', recursive=True)), ignore_index=True)
+    df_mirai = pd.concat((pd.read_csv(f) for f in iglob(
+        '../data/**/mirai_attacks/*.csv', recursive=True)), ignore_index=True)
     print('Loaded, shape: ')
     print(df_mirai.shape)
     df_mirai['class'] = 'mirai'
     print('Loading benign data')
-    df_benign = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
+    df_benign = pd.concat((pd.read_csv(f) for f in iglob(
+        '../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
     print('Loaded, shape: ')
     print(df_benign.shape)
     df_benign['class'] = 'benign'
-    df = df_benign.append(df_gafgyt.sample(n=df_benign.shape[0], random_state=17)).append(df_mirai.sample(n=df_benign.shape[0], random_state=17))
+    df = df_benign.append(df_gafgyt.sample(n=df_benign.shape[0], random_state=17)).append(
+        df_mirai.sample(n=df_benign.shape[0], random_state=17))
     return df
 
 
 def create_model(input_dim, add_hidden_layers, hidden_layer_size):
     model = Sequential()
-    model.add(Dense(hidden_layer_size, activation="tanh", input_shape=(input_dim,)))
+    model.add(Dense(hidden_layer_size, activation="tanh",
+              input_shape=(input_dim,)))
     for i in range(add_hidden_layers):
         model.add(Dense(hidden_layer_size, activation="tanh"))
     model.add(Dense(3))
     model.add(Activation('softmax'))
     return model
 
-def train(top_n_features = None):
+
+def train(top_n_features=None):
     df = load_data()
     train_with_data(top_n_features, df)
 
-def train_with_data(top_n_features = None, df = None):
+
+def train_with_data(top_n_features=None, df=None):
     X = df.drop(columns=['class'])
     if top_n_features is not None:
         fisher = pd.read_csv('../data/top_features_fisherscore.csv')
@@ -59,7 +66,8 @@ def train_with_data(top_n_features = None, df = None):
         X = X[list(features)]
     Y = pd.get_dummies(df['class'])
     print('Splitting data')
-    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(
+        X, Y, test_size=0.2, random_state=42)
     scaler = StandardScaler()
     print('Transforming data')
     scaler.fit(x_train)
@@ -69,23 +77,24 @@ def train_with_data(top_n_features = None, df = None):
     x_train = scaler.transform(x_train)
     x_test = scaler.transform(x_test)
     print('Creating a model')
-    
+
     model = create_model(input_dim, 1, 128)
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='adam', metrics=['accuracy'])
     cp = ModelCheckpoint(filepath=f'./models/model_{input_dim}.h5',
-                               save_best_only=True,
-                               verbose=0)
+                         save_best_only=True,
+                         verbose=0)
     tb = TensorBoard(log_dir=f'./logs',
-                histogram_freq=0,
-                write_graph=True,
-                write_images=True)
+                     histogram_freq=0,
+                     write_graph=True,
+                     write_images=True)
     epochs = 25
     model.fit(x_train, y_train,
-                    epochs=epochs,
-                    batch_size=256,
-                    validation_data=(x_test, y_test),
-                    verbose=1,
-                    callbacks=[tb, cp])
+              epochs=epochs,
+              batch_size=256,
+              validation_data=(x_test, y_test),
+              verbose=1,
+              callbacks=[tb, cp])
     print('Model evaluation')
     print('Loss, Accuracy')
     print(model.evaluate(x_test, y_test))
@@ -95,6 +104,7 @@ def train_with_data(top_n_features = None, df = None):
     print('Confusion matrix')
     print('benign  gafgyt  mirai')
     print(cnf_matrix)
+
 
 if __name__ == '__main__':
     train(*sys.argv[1:])

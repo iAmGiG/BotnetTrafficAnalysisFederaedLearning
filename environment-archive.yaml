@@ -10,8 +10,8 @@
 name: botnet-archive-2020
 
 channels:
-  - conda-forge
   - defaults
+  - conda-forge
 
 dependencies:
   # Python version - 2020 era (3.8 for TFF compatibility)

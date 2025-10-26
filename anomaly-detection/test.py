@@ -29,11 +29,13 @@ def test(top_n_features=115):
 
 def test_with_data(top_n_features, df_malicious):
     print("Testing")
-    df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
+    df = pd.concat((pd.read_csv(f) for f in iglob(
+        '../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
     fisher = pd.read_csv('../data/fisher/fisher.csv')
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
-    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])
+    x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [
+                                      int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     scaler = StandardScaler()
     scaler.fit(x_train.append(x_opt))
 
@@ -46,7 +48,8 @@ def test_with_data(top_n_features, df_malicious):
 
     df_benign = pd.DataFrame(x_test, columns=df.columns)
     df_benign['malicious'] = 0
-    df_malicious = df_malicious.sample(n=df_benign.shape[0], random_state=17)[list(features)]
+    df_malicious = df_malicious.sample(
+        n=df_benign.shape[0], random_state=17)[list(features)]
     df_malicious['malicious'] = 1
     df = df_benign.append(df_malicious)
     X_test = df.drop(columns=['malicious']).values
@@ -67,7 +70,8 @@ def test_with_data(top_n_features, df_malicious):
         print(f'Explaining for record nr {i}')
         explainer = lime.lime_tabular.LimeTabularExplainer(x_train.values, feature_names=df.drop(
             columns=['malicious']).columns.tolist(), discretize_continuous=True)
-        exp = explainer.explain_instance(X_test[i], model.scale_predict_classes)
+        exp = explainer.explain_instance(
+            X_test[i], model.scale_predict_classes)
         exp.save_to_file(f'lime/explanation{j}.html')
         print(exp.as_list())
         print('Actual class')
