@@ -53,51 +53,93 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 
 ## Areas of Uncertainty
 
-### ⚠️ Suspicion: Possible Overtraining
+### ⚠️ CONFIRMED: Data Leakage in Scaler Fitting
 
-**Observation**: 99.98% accuracy seemed unusually high, even for a well-defined classification problem.
+**Status**: CONFIRMED via code review (October 2024)
 
-**Possible Issues Identified (Retrospectively)**:
+**The Problem**:
 
-1. **Data Leakage?**
-   - Need to verify train/test splits were truly independent
-   - Check if any feature engineering used test data information
-   - Verify no temporal leakage (if dataset has time ordering)
+The StandardScaler was being fit on BOTH training AND validation data:
 
-2. **Overfitting Indicators**:
-   - High accuracy but no cross-validation reported
-   - Training curves not documented in detail
-   - Model complexity vs dataset size not analyzed
+```python
+# anomaly-detection/train_og.py:29
+scaler.fit(x_train.append(x_opt))  # WRONG! Includes validation data
+```
 
-3. **Dataset Characteristics**:
-   - Botnet traffic may be highly distinctive (easy to classify)
-   - Fisher feature selection might have amplified separability
-   - Binary separation (benign vs attack) is easier than nuanced classification
+**Impact**:
+
+This is **data leakage** - the scaler learned mean/std statistics from validation data (`x_opt`) that should have been unseen during training. The model then tested on data whose normalization was influenced by that same data.
+
+**Correct approach**:
+
+```python
+scaler.fit(x_train)  # Only training data
+```
+
+**What This Means for Results**:
+
+1. The 99.98% classification accuracy is likely **inflated**
+2. The anomaly detection thresholds were calculated using leaked statistics
+3. This explains the "too good to be true" feeling
+4. Results need to be re-evaluated with proper scaler fitting
+
+**Additional Issues Found**:
+
+1. **Test/Train Overlap**: Same random_state=17 used in both train and test scripts
+2. **No Cross-Validation**: Single train/test split means no validation of robustness
+3. **Dataset Characteristics**: Botnet traffic IS highly distinctive (this helps explain high accuracy even with leakage)
 
 **What We Should Have Done**:
 
+- Fit scaler only on training data
 - K-fold cross-validation
 - Plot training/validation loss curves
 - Test on completely different IoT devices (generalization)
 - Regularization analysis (dropout, L1/L2)
 - Ablation studies
 
-### ⚠️ Federated Learning: Incomplete
+**GitHub Issue**: #13
 
-**Status**: Experimental, simulation-only, never production-ready
+### ⚠️ CONFIRMED: Federated Learning Never Used Actual Botnet Data
+
+**Status**: CONFIRMED via code review (October 2024)
+
+**The Problem**:
+
+`train_v04.py` was never successfully adapted to use botnet traffic data. It still uses the EMNIST (handwritten digits) dataset from TensorFlow Federated examples:
+
+```python
+# Line 236-239
+emnist_train, emnist_test = dataset.get_emnist_datasets(...)
+
+# Lines 186-220 - Conv2D layers for IMAGES, not tabular data!
+conv2d = functools.partial(tf.keras.layers.Conv2D,
+                           input_shape=(28, 28, 1))  # This is for 28x28 images!
+```
+
+**What This Means**:
+
+1. The "federated learning" experiments were simulations on EMNIST digit classification
+2. The autoencoder model has Conv2D layers inappropriate for tabular network traffic
+3. This was an **abandoned experiment** - never completed
+4. Any FL results in the paper are from digit classification, NOT botnet detection
 
 **What Happened**:
 
 - TensorFlow Federated API was complex and poorly documented (2020)
+- Struggled to adapt TFF's image-based examples to tabular data
 - PySyft had TensorFlow compatibility issues
-- Simulation approach worked but couldn't deploy
-- "yep......???????" comments in code reveal frustration
+- Time pressure + complexity led to incomplete adaptation
+- Comments like "yep......???????" reveal the struggle
 
 **Reality Check**:
 
 - FL was the "stretch goal" - the core ML work succeeded
 - Getting published on the core contribution was the real achievement
-- FL simulation proved the concept even if incomplete
+- FL simulation on EMNIST proved the concept, even if not with actual data
+- This is **honest research** - we tried, documented the attempt, moved on
+
+**GitHub Issue**: #14
 
 ---
 
