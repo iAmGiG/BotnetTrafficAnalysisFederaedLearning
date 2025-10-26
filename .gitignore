@@ -1,73 +1,101 @@
+# Data files (large datasets)
 data/
 __pycache__/
 .DS_Store
 .ipynb_checkpoints/
 
-# User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# Generated files
-.idea/**/contentModel.xml
+# Claude Code
+.claude/
+CLAUDE.md
 
-# Sensitive or high-churn files
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-.idea/**/dbnavigator.xml
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Gradle
-.idea/**/gradle.xml
-.idea/**/libraries
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+.conda/
 
-# Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
 
-# CMake
-cmake-build-*/
+# pyenv
+.python-version
 
-# Mongo Explorer plugin
-.idea/**/mongoSettings.xml
+# Data files (exclude large, include references)
+data/
+*.csv
+!data/fisher/*.csv
+!data/fisher/demonstrate_structure.csv
 
-# File-based project format
-*.iws
+# Model files
+*.h5
+*.pb
+models/
+logs/
+*.ckpt
+*.pth
+*.weights
 
-# IntelliJ
-out/
+# TensorBoard
+events.out.tfevents.*
 
-# mpeltonen/sbt-idea plugin
-.idea_modules/
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+.directory
 
-# JIRA plugin
-atlassian-ide-plugin.xml
+# Temporary files
+*.tmp
+*.bak
+*.swp
+~*
 
-# Cursive Clojure plugin
-.idea/replstate.xml
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Crashlytics plugin (for Android Studio and IntelliJ)
-com_crashlytics_export_strings.xml
-crashlytics.properties
-crashlytics-build.properties
-fabric.properties
+# pytest
+.pytest_cache/
+.tox/
 
-# Editor-based Rest Client
-.idea/httpRequests
-
-# Android studio 3.1+ serialized cache file
-.idea/caches/build_file_checksums.ser
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
