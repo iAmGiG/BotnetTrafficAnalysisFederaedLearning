@@ -2,16 +2,16 @@
 
 <div align="center">
 
-[![Archive Branch](https://img.shields.io/badge/Branch-archive--2020--research-orange?style=for-the-badge)](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning/tree/archive-2020-research)
-[![Python 3.8](https://img.shields.io/badge/Python-3.8-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![TensorFlow 2.10](https://img.shields.io/badge/TensorFlow-2.10-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
+[![Main Branch](https://img.shields.io/badge/Branch-main-blue?style=for-the-badge)](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![TensorFlow 2.10+](https://img.shields.io/badge/TensorFlow-2.10+-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 [![Published Paper](https://img.shields.io/badge/Published-ScienceDirect-red?style=for-the-badge)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
 [![KSU Thesis](https://img.shields.io/badge/Thesis-KSU_Digital_Commons-darkred?style=for-the-badge)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
 [![Dataset](https://img.shields.io/badge/Dataset-N--BaIoT_UCI-yellow?style=for-the-badge)](https://archive.ics.uci.edu/ml/machine-learning-databases/00442/)
 
-[![Accuracy](https://img.shields.io/badge/Classification_Accuracy-99.98%25-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](#key-results)
+[![Validated Accuracy](https://img.shields.io/badge/Classification_Accuracy-99.85%25_(validated)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](#key-results)
 [![IoT Devices](https://img.shields.io/badge/IoT_Devices-9-blueviolet?style=for-the-badge)](#architecture)
 [![Features](https://img.shields.io/badge/Features-115-lightblue?style=for-the-badge)](#architecture)
 
@@ -19,7 +19,7 @@
 
 ---
 
-> **⚠️ This is the `archive-2020-research` branch** - Preserved 2020 research code with organized structure and working dependencies. For the modernized version, see the `main` branch.
+> **✅ This is the `main` branch** - Production-ready implementation with critical bug fixes and validated results. For the original 2020 research code, see the [`archive-2020-research`](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning/tree/archive-2020-research) branch.
 
 ---
 
