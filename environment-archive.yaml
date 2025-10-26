@@ -14,8 +14,9 @@ channels:
   - conda-forge
 
 dependencies:
-  # Python version - 2020 era (3.8 for TFF compatibility)
-  - python=3.8
+  # Python version - 3.9 required (TFF 0.40.0 requires Python >=3.9)
+  # Note: Original dev notes said 3.7-3.8, but pip shows TFF 0.40.0 needs 3.9+
+  - python=3.9
 
   # Core ML/DL (conda)
   - tensorflow=2.10.*          # Last version before major keras changes
