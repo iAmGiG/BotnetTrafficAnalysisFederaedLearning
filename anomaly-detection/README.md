@@ -4,7 +4,7 @@ The aim is to reproduce this paper's https://arxiv.org/pdf/1805.03409.pdf models
 Some data about model used in papers is in `../config/devices.json` file.
 
 ## Python dependencies
-Check that you have python dependencies installed listed in `../requirements.txt` file
+See `../environment-archive.yaml` for conda environment with all dependencies
 
 ## Training models
 

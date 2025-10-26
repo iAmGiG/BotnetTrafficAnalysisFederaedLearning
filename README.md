@@ -87,7 +87,7 @@ archive-2020-research/
 │       ├── N_BaIoT_dataset.md # Complete dataset documentation
 │       ├── README.md          # Paper references
 │       └── thesis.pdf         # Reference material
-├── environment-archive.yml    # Conda environment (2020 deps)
+├── environment-archive.yaml   # Conda environment (2020 deps)
 ├── PYSYFT_RESEARCH.md        # FL framework analysis
 └── README.md                  # This file
 ```
@@ -100,7 +100,7 @@ archive-2020-research/
 
 ```bash
 # Create conda environment (Python 3.8, TensorFlow 2.10, TFF 0.40)
-conda env create -f environment-archive.yml
+conda env create -f environment-archive.yaml
 conda activate botnet-archive-2020
 ```
 

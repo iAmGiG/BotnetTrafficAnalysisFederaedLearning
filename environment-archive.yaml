@@ -2,7 +2,7 @@
 # This environment preserves the original 2020 research codebase with compatible dependencies
 #
 # Create environment:
-#   conda env create -f environment-archive.yml
+#   conda env create -f environment-archive.yaml
 #
 # Activate environment:
 #   conda activate botnet-archive-2020

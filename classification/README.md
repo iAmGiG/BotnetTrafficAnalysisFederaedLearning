@@ -1,5 +1,5 @@
 ## Python dependencies
-Check that you have python dependencies installed listed in `../requirements.txt` file
+See `../environment-archive.yaml` for conda environment with all dependencies
 
 ## Download the dataset
 Use `python ../scripts/download_data.py` script

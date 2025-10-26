@@ -9,6 +9,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 ## Context: 2020 Research Environment
 
 ### What Was Happening
+
 - **Federated Learning**: Emerging field, frameworks were experimental (TFF ~1 year old, PySyft unstable)
 - **Deep Learning**: Rapid evolution, new techniques emerging monthly
 - **COVID-19**: Disrupted research workflows and access to resources
@@ -16,6 +17,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 - **IoT Security**: Niche intersection of multiple complex domains
 
 ### What We Were Trying To Do
+
 1. **Primary Goal**: Detect and classify IoT botnet attacks using deep learning
 2. **Stretch Goal**: Implement federated learning for distributed IoT security
 3. **Research Goal**: Demonstrate that DL could outperform traditional ML without feature selection
@@ -26,12 +28,14 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 ## What Worked Well
 
 ### ✅ Classification Results
+
 - **Achieved**: 99.98% accuracy with all 115 features
 - **Achieved**: 99.94% accuracy with just top 3 features
 - **Published**: Paper accepted and published in peer-reviewed venue
 - **Dataset**: Successfully used real N-BaIoT dataset (not simulated data)
 
 ### ✅ Technical Implementation
+
 - Proper train/validation/test splits
 - Feature selection using Fisher scores
 - LIME explanations generated
@@ -39,6 +43,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 - Comprehensive evaluation metrics
 
 ### ✅ Research Process
+
 - Iterative development (train_v00 through train_v04)
 - Multiple framework attempts (TFF, PySyft)
 - Documentation of experimental approaches
@@ -53,6 +58,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 **Observation**: 99.98% accuracy seemed unusually high, even for a well-defined classification problem.
 
 **Possible Issues Identified (Retrospectively)**:
+
 1. **Data Leakage?**
    - Need to verify train/test splits were truly independent
    - Check if any feature engineering used test data information
@@ -69,6 +75,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
    - Binary separation (benign vs attack) is easier than nuanced classification
 
 **What We Should Have Done**:
+
 - K-fold cross-validation
 - Plot training/validation loss curves
 - Test on completely different IoT devices (generalization)
@@ -80,12 +87,14 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 **Status**: Experimental, simulation-only, never production-ready
 
 **What Happened**:
+
 - TensorFlow Federated API was complex and poorly documented (2020)
 - PySyft had TensorFlow compatibility issues
 - Simulation approach worked but couldn't deploy
 - "yep......???????" comments in code reveal frustration
 
 **Reality Check**:
+
 - FL was the "stretch goal" - the core ML work succeeded
 - Getting published on the core contribution was the real achievement
 - FL simulation proved the concept even if incomplete
@@ -95,6 +104,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 ## Technical Deep Dive (To Be Completed After Testing)
 
 ### Test Results (TBD)
+
 *After running tests with 2024 environment:*
 
 - [ ] Can we reproduce the 99.98% accuracy?
@@ -103,12 +113,14 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 - [ ] Are there signs of overfitting?
 
 ### Data Analysis (TBD)
+
 - [ ] Verify train/test split methodology
 - [ ] Check for data leakage
 - [ ] Analyze feature distributions
 - [ ] Test generalization to unseen devices
 
 ### Model Analysis (TBD)
+
 - [ ] Examine learned weights
 - [ ] Analyze LIME explanations for sensibility
 - [ ] Check if model is learning actual patterns vs artifacts
@@ -118,6 +130,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 ## Lessons Learned
 
 ### What 2020-Me Did Right ✅
+
 1. **Published despite uncertainty** - Better to contribute imperfect research than nothing
 2. **Documented experimental attempts** - All the train_v*.py files show learning process
 3. **Used real data** - N-BaIoT dataset was proper academic dataset
@@ -125,6 +138,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 5. **Proper attribution** - Cited all sources appropriately
 
 ### What 2020-Me Could Have Done Better 📚
+
 1. **Cross-validation** - Should have validated across multiple splits
 2. **Learning curves** - Should have plotted and analyzed training dynamics
 3. **Generalization testing** - Should have tested on completely different devices
@@ -132,6 +146,7 @@ This document provides an honest retrospective analysis of the IoT Botnet Traffi
 5. **Asked for help** - Could have reached out to community/advisors about uncertainty
 
 ### What 2024-Me Knows Now 🎯
+
 1. **Imposter syndrome is real** - Everyone feels like they don't understand everything
 2. **Research is iterative** - First attempts are never perfect
 3. **Questions are valuable** - Identifying potential issues shows critical thinking
@@ -235,15 +250,19 @@ This project represents **real graduate research** conducted during a challengin
 *To be filled in after running tests in 2024*
 
 ### Test Date: [TBD]
+
 ### Environment: botnet-archive-2020
-### Tests Run:
+
+### Tests Run
+
 - [ ] Basic import verification
 - [ ] Classification training (small subset)
 - [ ] Result reproduction
 - [ ] Cross-validation
 - [ ] Data leakage checks
 
-### Findings:
+### Findings
+
 *[To be documented]*
 
 ---
