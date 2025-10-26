@@ -7,13 +7,13 @@
 [![TensorFlow 2.10](https://img.shields.io/badge/TensorFlow-2.10-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-[![Published Paper](https://img.shields.io/badge/📄_Published-ScienceDirect-red?style=for-the-badge)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
-[![KSU Thesis](https://img.shields.io/badge/📚_Thesis-KSU_Digital_Commons-darkred?style=for-the-badge)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
+[![Published Paper](https://img.shields.io/badge/Published-ScienceDirect-red?style=for-the-badge)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
+[![KSU Thesis](https://img.shields.io/badge/Thesis-KSU_Digital_Commons-darkred?style=for-the-badge)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
 [![Dataset](https://img.shields.io/badge/Dataset-N--BaIoT_UCI-yellow?style=for-the-badge)](https://archive.ics.uci.edu/ml/machine-learning-databases/00442/)
 
-[![Accuracy](https://img.shields.io/badge/Classification_Accuracy-99.98%25-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](#-key-results)
-[![IoT Devices](https://img.shields.io/badge/IoT_Devices-9-blueviolet?style=for-the-badge)](#-architecture)
-[![Features](https://img.shields.io/badge/Features-115-lightblue?style=for-the-badge)](#-architecture)
+[![Accuracy](https://img.shields.io/badge/Classification_Accuracy-99.98%25-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](#key-results)
+[![IoT Devices](https://img.shields.io/badge/IoT_Devices-9-blueviolet?style=for-the-badge)](#architecture)
+[![Features](https://img.shields.io/badge/Features-115-lightblue?style=for-the-badge)](#architecture)
 
 </div>
 
@@ -23,36 +23,40 @@
 
 ---
 
-## 📚 Published Research
+## Published Research
 
 **Title**: *Detecting, Classifying and Explaining IoT Botnet Attacks Using Deep Learning Methods Based on Network Data*
 
 **Published Papers**:
-- 📄 [ScienceDirect (Journal Publication)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
-- 📄 [Kennesaw State University Digital Commons (Thesis)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
+
+- [ScienceDirect (Journal Publication)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
+- [Kennesaw State University Digital Commons (Thesis)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
 
 **Institution**: Kennesaw State University, Department of Computer Science
 **Year**: 2020-2022
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 This project demonstrates that deep learning models can effectively detect and classify IoT botnet attacks using network traffic data in a device-agnostic manner. Two complementary approaches are implemented:
 
 ### 1. **Anomaly Detection** (`anomaly-detection/`)
+
 - **Approach**: Autoencoder-based deep learning
 - **Goal**: Detect malicious vs. benign traffic
 - **Method**: Learn normal traffic patterns, flag deviations as attacks
 - **Dataset**: Trained on benign traffic, tested against Mirai and Gafgyt attacks
 
 ### 2. **Classification** (`classification/`)
+
 - **Approach**: Multi-class neural network classifier
 - **Goal**: Classify attack types (benign, Gafgyt, Mirai)
 - **Results**: **99.98% accuracy** with all features, **99.9%** with top 3 features
 - **Method**: Supervised learning with labeled attack data
 
 ### 3. **Federated Learning** (Experimental)
+
 - **Status**: Research/experimental - simulation-based, not production
 - **Implementation**: TensorFlow Federated (TFF) simulation
 - **Latest**: `anomaly-detection/train_v04.py`, `run_experiment_*.py`
@@ -60,9 +64,9 @@ This project demonstrates that deep learning models can effectively detect and c
 
 ---
 
-## 🗂️ Repository Structure
+## Repository Structure
 
-```
+```bash
 archive-2020-research/
 ├── anomaly-detection/          # Anomaly detection (autoencoders)
 │   ├── train_v04.py           # Latest FL implementation
@@ -94,7 +98,7 @@ archive-2020-research/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Setup Environment
 
@@ -120,6 +124,7 @@ python scripts/download_data.py
 ### 3. Train Models
 
 **Anomaly Detection:**
+
 ```bash
 cd anomaly-detection
 python train_og.py              # Original centralized training
@@ -127,6 +132,7 @@ python train_v04.py             # Federated learning (simulation)
 ```
 
 **Classification:**
+
 ```bash
 cd classification
 python train.py                 # All features
@@ -147,9 +153,10 @@ python test.py 5 'model_5.h5'   # Test with top 5 features
 
 ---
 
-## 📊 Key Results
+## Key Results
 
 ### Classification Performance
+
 | Features | Accuracy | Training Time | Notes |
 |----------|----------|---------------|-------|
 | All 115  | 99.98%   | 42 min (20 epochs) | Best accuracy |
@@ -158,7 +165,8 @@ python test.py 5 'model_5.h5'   # Test with top 5 features
 | Top 2    | 84.30%   | ~8 min (5 epochs)  | Insufficient features |
 
 **Confusion Matrix (Top 3 Features)**:
-```
+
+```bash
               Predicted
               Benign  Gafgyt  Mirai
 Actual Benign  111439    40      6
@@ -167,24 +175,27 @@ Actual Benign  111439    40      6
 ```
 
 ### Anomaly Detection
+
 - Threshold-based detection using MSE reconstruction error
 - Trained per-device for device-specific normal patterns
 - Evaluated against Mirai and BASHLITE botnet attacks
 
 ---
 
-## 🧪 Explainability
+## Explainability
 
 This project uses **LIME (Local Interpretable Model-agnostic Explanations)** to interpret black-box deep learning decisions:
+
 - Generates HTML explanations for individual predictions
 - Shows which features contributed to classification
 - Demonstrates that DL opacity can be mitigated
 
 ---
 
-## 🔬 Federated Learning (Experimental)
+## Federated Learning (Experimental)
 
 ### What Was Attempted
+
 This project explored federated learning (FL) as a graduate research project at Kennesaw State University. Multiple approaches were tried:
 
 1. **TensorFlow Federated (TFF)** - Primary approach, simulation-based
@@ -192,19 +203,22 @@ This project explored federated learning (FL) as a graduate research project at 
 3. **Manual FedAvg** - Custom implementation attempt
 
 ### Current Status
+
 - **Working**: Simulation code in `train_v04.py` and `run_experiment_*.py`
 - **Limitation**: Simulation-only, not true distributed deployment
 - **Note**: See `docs/archived/experimental/README.md` for full evolution history
 
 ### For Modern FL Approaches
+
 See `PYSYFT_RESEARCH.md` for:
+
 - Analysis of 2020 vs 2025 FL frameworks
 - Recommendations for modernization
 - Alternative frameworks (Flower, modern TFF)
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 - **Dataset**: `docs/references/N_BaIoT_dataset.md` - Complete dataset documentation with citations
 - **Experiments**: `docs/archived/experimental/README.md` - Evolution of FL attempts
@@ -213,9 +227,10 @@ See `PYSYFT_RESEARCH.md` for:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### IoT Devices (9 Commercial Devices)
+
 1. Danmini Doorbell
 2. Ecobee Thermostat
 3. Philips B120N/10 Baby Monitor
@@ -227,17 +242,19 @@ See `PYSYFT_RESEARCH.md` for:
 9. (One additional device)
 
 ### Attack Types
+
 - **Mirai**: TCP, UDP, ACK, HTTP, and other flood attacks
 - **BASHLITE (Gafgyt)**: Various attack vectors
 
 ### Features
+
 - **115 statistical features** extracted using AfterImage framework
 - **Fisher score** feature selection for dimensionality reduction
 - Damped incremental statistics on network streams
 
 ---
 
-## ⚙️ Technical Stack
+## Technical Stack
 
 <div align="center">
 
@@ -252,6 +269,7 @@ See `PYSYFT_RESEARCH.md` for:
 </div>
 
 ### Dependencies (2020-era)
+
 - Python 3.8
 - TensorFlow 2.10.0
 - TensorFlow Federated 0.40.0
@@ -261,6 +279,7 @@ See `PYSYFT_RESEARCH.md` for:
 - LIME 0.2.0.1
 
 ### Known Issues
+
 - Uses deprecated `DataFrame.append()` - works with Pandas 1.3.5
 - Mixes `keras` and `tensorflow.keras` imports - works with TF 2.10
 - CPU-optimized (GPU setup not guaranteed)
@@ -269,9 +288,10 @@ See `PYSYFT_RESEARCH.md` for:
 
 ---
 
-## 📝 Citations
+## Citations
 
 ### This Project
+
 ```bibtex
 @article{yourname2022botnet,
   title={Detecting, Classifying and Explaining IoT Botnet Attacks Using Deep Learning Methods Based on Network Data},
@@ -283,6 +303,7 @@ See `PYSYFT_RESEARCH.md` for:
 ```
 
 ### N-BaIoT Dataset
+
 ```bibtex
 @article{meidan2018nbaiot,
   title={N-BaIoT—Network-Based Detection of IoT Botnet Attacks Using Deep Autoencoders},
@@ -298,7 +319,7 @@ See `PYSYFT_RESEARCH.md` for:
 
 ---
 
-## 🌿 Branch Information
+## Branch Information
 
 **Current Branch**: `archive-2020-research`
 **Status**: Archived, functional, preserved research code
@@ -306,12 +327,13 @@ See `PYSYFT_RESEARCH.md` for:
 **Original Research Period**: 2020-2022
 
 **Other Branches**:
+
 - `main` - Modern refactored version (coming soon)
 - `develop` - Original development branch (historical reference)
 
 ---
 
-## 📧 Contact & Acknowledgments
+## Contact & Acknowledgments
 
 **Institution**: Kennesaw State University
 **Lab**: CCSE, DSL Laboratory
@@ -321,7 +343,7 @@ See `PYSYFT_RESEARCH.md` for:
 
 ---
 
-## 📄 License
+## License
 
 [Specify your license here]
 
@@ -329,7 +351,7 @@ See `PYSYFT_RESEARCH.md` for:
 
 <div align="center">
 
-**⭐ This is portfolio-quality research code from 2020, preserved and organized for reference.**
+**This is portfolio-quality research code from 2020, preserved and organized for reference.**
 
 [![GitHub issues](https://img.shields.io/github/issues/iAmGiG/BotnetTrafficAnalysisFederaedLearning?style=flat-square)](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning/issues)
 [![GitHub stars](https://img.shields.io/github/stars/iAmGiG/BotnetTrafficAnalysisFederaedLearning?style=flat-square)](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning/stargazers)
