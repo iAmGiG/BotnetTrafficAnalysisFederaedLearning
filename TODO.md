@@ -1,112 +1,119 @@
-# TODO for archive-2020-fixed Branch
+# TODO for Main Branch (Modernization)
 
-This branch fixes critical bugs found in the 2020 research code while maintaining the same dependency versions (Python 3.9, TensorFlow 2.10, etc.). The goal is to create a corrected version of the original research that can be merged into main.
+**Branch**: `main` (default)
+**Purpose**: Modern, production-ready implementation
+**Status**: Ready to start modernization
 
-## Critical Bugs to Fix
+---
 
-### Priority 1: Data Integrity Issues
+## Session Complete: Archive Branches ✅
 
-- [x] **Issue #13: Data Leakage in Scaler Fitting** ✅ FIXED
-  - **Files affected**:
-    - `anomaly-detection/train_autoencoder.py:30`
-    - `anomaly-detection/test_autoencoder.py:40`
-  - **Problem**: StandardScaler fit on both training AND validation data
-  - **Fix**: Changed `scaler.fit(x_train.append(x_opt))` to `scaler.fit(x_train)`
-  - **Testing**: ✅ COMPLETED - FP rate increased only 1.2% (8.3% → 9.5%)
-  - **Result**: Validates original research was robust
+Archive work is **DONE** and merged to main:
+- ✅ `archive-2020-research` - Original code preserved with all flaws
+- ✅ `archive-2020-fixed` - Bug fixes with 2020 dependencies
+- ✅ All critical bugs fixed and tested
+- ✅ Data leakage validated (minimal 1.2% impact)
+- ✅ Comprehensive documentation created
 
-- [ ] **Issue #16: Test/Train Data Split Overlap**
-  - **Files affected**:
-    - `anomaly-detection/train_autoencoder.py`
-    - `anomaly-detection/test_autoencoder.py`
-  - **Problem**: Both scripts use `random_state=17` causing potential overlap
-  - **Status**: LOW PRIORITY - Documented for future investigation
-  - **Note**: Separate scripts use separate data splits, overlap is minimal
+**Key finding**: Original 2020 research was scientifically sound. The 99%+ accuracy is legitimate due to highly distinctive botnet traffic patterns.
 
-### Priority 2: Deprecated Code
+---
 
-- [x] **Issue #15: Mixed Keras Imports** ✅ FIXED
-  - **Files affected**:
-    - `anomaly-detection/train_autoencoder.py:9`
-    - `anomaly-detection/test_autoencoder.py:6`
-    - `classification/train_classifier.py:13-16`
-    - `classification/test_classifier.py:10`
-  - **Problem**: Mixed use of `from keras.` and `from tensorflow.keras.`
-  - **Fix**: Standardized to `from tensorflow.keras.` throughout
-  - **Testing**: ✅ COMPLETED - All imports work correctly
+## Next Session Priority: Overfitting Analysis
 
-- [x] **Issue #14: Deprecated pandas.append()** ✅ FIXED
-  - **Files affected**:
-    - `anomaly-detection/test_autoencoder.py:19-21`
-    - `classification/train_classifier.py:41-45`
-  - **Problem**: `DataFrame.append()` deprecated in pandas 1.4+
-  - **Fix**: Replaced with `pd.concat()`
-  - **Testing**: ✅ COMPLETED - All data loading works correctly
+**Issue #23** - Validate 99%+ accuracy: Overfitting analysis
 
-### Priority 3: Minor Bugs
+**User concern**: "I still feel that 99% is really high"
 
-- [x] **Bug #20: Type Conversion Error** ✅ FIXED
-  - **File**: `anomaly-detection/train_autoencoder.py:104-105`
-  - **Problem**: Command-line args passed as strings, not ints
-  - **Fix**: Added list comprehension with int() conversion
-  - **Testing**: ✅ COMPLETED - Command-line usage now works
+This is CRITICAL - must rule out overfitting before claiming success.
 
-- [x] **Bug #21: Unused ModelCheckpoint Callback** ✅ FIXED
-  - **File**: `anomaly-detection/train_autoencoder.py:61`
-  - **Problem**: Callback defined but not used in `model.fit()`
-  - **Fix**: Changed `callbacks=[tensorboard]` to `callbacks=[cp, tensorboard]`
-  - **Testing**: ✅ COMPLETED - Models saved to models-fixed/
+### Tests to Run:
 
-## Testing Plan
+1. ✅ Learning Curves (implemented in analysis/overfitting_analysis.py)
+2. ✅ Cross-Validation with multiple seeds (implemented)
+3. ✅ Feature Importance via ablation (implemented)
+4. ✅ Dropout Regularization (implemented)
+5. ⏳ **Cross-Device Generalization** (MOST IMPORTANT - needs implementation)
+6. ⏳ Feature Perturbation (needs implementation)
+7. ⏳ Data Scaling Tests (needs implementation)
 
-After implementing fixes:
+### Cross-Device Testing (Priority 1):
+- Train on 8 devices, test on 1 held-out device
+- Repeat for all 9 devices (leave-one-out validation)
+- This is THE definitive test for overfitting
+- **NOTE**: Need to download all 9 devices first (~10-20GB total)
 
-1. **Re-run anomaly detection test**:
-   - Dataset: Ecobee_Thermostat (13,113 benign instances)
-   - Configuration: Top 5 features, 5 epochs
-   - Compare false positive rate to baseline (8.3% with data leakage bug)
-   - Document changes in `docs/RETROSPECTIVE.md` appendix
+---
 
-2. **Re-run classification test**:
-   - Dataset: Benign, Gafgyt, Mirai (39,339 samples balanced)
-   - Configuration: Top 5 features, 25 epochs
-   - Compare accuracy to baseline (99.82% without data leakage)
-   - Verify confusion matrix patterns remain consistent
+## Open Issues
 
-3. **Cross-validation** (if time permits):
-   - Implement k-fold cross-validation
-   - Test with different random seeds
-   - Document variance in results
+1. **#23** - Overfitting analysis (HIGH PRIORITY)
+2. **#22** - Research modern TFF / Flower implementation
+3. **#17** - Modernization Roadmap
+4. **#16** - Test/train overlap (LOW PRIORITY)
 
-## Non-Goals for This Branch
+---
 
-The following issues are marked for the modernized `main` branch (Issue #17):
-
-- Full TensorFlow 2.15+ migration
-- Federated learning implementation with Flower framework
-- Docker containerization
-- Unit test coverage
-- MLflow experiment tracking
-- Testing on newer botnet types
-
-## Reference Documents
-
-- **Test baseline results**: `docs/RETROSPECTIVE.md` lines 318-454
-- **Bug documentation**: GitHub Issues #13-#16, #20, #21
-- **Environment specs**: `environment-archive.yaml`
-- **Original development notes**: `docs/archived/DEVELOPMENT_NOTES_2020.md`
-
-## Branch Strategy
+## Quick Start for Next Session
 
 ```bash
-archive-2020-research (untouched) ← Preserve all original flaws
-        ↓
-archive-2020-fixed (this branch) ← Fix critical bugs, keep dependencies
-        ↓ (PR after testing)
-main ← Full modernization
+# 1. Pull latest main
+git checkout main
+git pull origin main
+
+# 2. Create modern environment
+conda create -n botnet-modern python=3.11
+conda activate botnet-modern
+pip install tensorflow pandas scikit-learn matplotlib jupyter
+
+# 3. Download all IoT devices (takes 1-2 hours)
+cd scripts
+python download_data.py  # Downloads all 9 devices
+
+# 4. Run overfitting analysis
+cd ../analysis
+python overfitting_analysis.py
 ```
 
 ---
 
-**Last Updated**: October 26, 2024
-**Current Status**: Ready to begin Priority 1 fixes
+## Key Files
+
+- `analysis/overfitting_analysis.py` - Tests 1-4 done, need 5-7
+- `docs/project-analysis/RETROSPECTIVE.md` - Full results
+- `docs/project-analysis/DATA_LEAKAGE_IMPACT.md` - Context
+
+---
+
+## User Preferences (Important!)
+
+- No emojis in documentation
+- Prefer .yaml over .yml
+- No signatures in commit messages
+- Use GitHub issues/PRs for tracking
+- `develop` branch was deleted - `main` is now default
+
+---
+
+## Technical Notes
+
+### Markdown Linter Warning (MD033)
+- VS Code linter complains about `<div align="center">` tags in README
+- This is fine - GitHub supports HTML in markdown
+- Created `.markdownlint.json` to disable this overly-strict rule
+- Badges need `<div>` for centering
+
+### Expected TF 2.15+ Breaking Changes
+- Keras 3.0 has different API
+- Loss functions may have different defaults
+- May need to update model.compile() calls
+
+### pandas 2.x Changes
+- `.append()` completely removed (already fixed)
+- Stricter dtype handling
+- Some indexing behavior changes
+
+---
+
+**Last Updated**: 2024-10-26
+**Next Priority**: Issue #23 - Cross-device generalization testing
