@@ -394,6 +394,7 @@ callbacks=[tensorboard]  # Should be: callbacks=[cp, tensorboard]
 **Dataset**: Ecobee_Thermostat benign traffic only
 
 **Configuration**:
+
 - Features: Top 10 (from Fisher scores)
 - Split: 1/3 train, 1/3 validation, 1/3 test (random_state=17)
 - Epochs: 5
@@ -401,7 +402,8 @@ callbacks=[tensorboard]  # Should be: callbacks=[cp, tensorboard]
 - Model: Deep autoencoder (7 hidden layers with tanh activation)
 
 **Results (WITH ALL BUGS FIXED)**:
-```
+
+```bash
 Training Loss: 0.6997 (final epoch)
 Validation Loss: 0.6317
 Threshold: 1.7779 (mean MSE 0.6317 + std 1.1462)
@@ -409,7 +411,8 @@ False Positives: 415/4,371 (9.5% FP rate on benign test data)
 ```
 
 **Comparison to Original (WITH data leakage, 5 features)**:
-```
+
+```bash
 Threshold: 2.9124 vs 1.7779 (lower with more features)
 FP Rate: 8.3% vs 9.5% (+1.2% increase)
 FP Count: 364 vs 415 (+51 false positives)
@@ -417,6 +420,7 @@ Mean MSE: 0.9583 vs 0.6317 (better reconstruction)
 ```
 
 **Observations**:
+
 1. **Minimal impact from data leakage fix** - FP rate increased by only 1.2%
 2. **Different feature counts** - Original used 5 features, fixed used 10 features
 3. **Lower threshold with 10 features** - Better reconstruction with more features
@@ -425,6 +429,7 @@ Mean MSE: 0.9583 vs 0.6317 (better reconstruction)
 
 **Key Insight**:
 The data leakage bug existed but did NOT invalidate the research. The high accuracy was primarily due to:
+
 - Effective Fisher score feature selection identifying discriminative features
 - Highly distinctive botnet traffic patterns in the N-BaIoT dataset
 - Appropriate autoencoder architecture for anomaly detection
