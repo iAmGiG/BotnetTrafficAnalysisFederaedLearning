@@ -64,7 +64,9 @@ data/
 *.h5
 *.pb
 models/
+models-fixed/
 logs/
+logs-fixed/
 *.ckpt
 *.pth
 *.weights

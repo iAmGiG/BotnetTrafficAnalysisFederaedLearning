@@ -34,16 +34,20 @@ def train(top_n_features=10):
     model = create_model(top_n_features)
     model.compile(loss="mean_squared_error",
                   optimizer="sgd")
-    cp = ModelCheckpoint(filepath=f"models/model_{top_n_features}.h5",
+    # Create output directories if they don't exist
+    os.makedirs("models-fixed", exist_ok=True)
+    os.makedirs("logs-fixed", exist_ok=True)
+
+    cp = ModelCheckpoint(filepath=f"models-fixed/model_{top_n_features}.h5",
                          save_best_only=True,
                          verbose=0)
-    tb = TensorBoard(log_dir=f"./logs",
+    tb = TensorBoard(log_dir=f"./logs-fixed",
                      histogram_freq=0,
                      write_graph=True,
                      write_images=True)
     NAME = "//trainData"
     # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME), histogram_freq=1, profile_batch=100000000)
-    tensorboard = TensorBoard(log_dir=f"./logs",
+    tensorboard = TensorBoard(log_dir=f"./logs-fixed",
                               histogram_freq=1,
                               profile_batch=100000000)
     print(f"Training model for all data combined")

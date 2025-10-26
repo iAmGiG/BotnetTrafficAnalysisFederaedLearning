@@ -72,7 +72,12 @@ def train_with_data(top_n_features=None, df=None):
     print('Transforming data')
     scaler.fit(x_train)
     input_dim = X.shape[1]
-    scalerfile = f'./models/scaler_{input_dim}.sav'
+
+    # Create output directories if they don't exist
+    os.makedirs("models-fixed", exist_ok=True)
+    os.makedirs("logs-fixed", exist_ok=True)
+
+    scalerfile = f'./models-fixed/scaler_{input_dim}.sav'
     pickle.dump(scaler, open(scalerfile, 'wb'))
     x_train = scaler.transform(x_train)
     x_test = scaler.transform(x_test)
@@ -81,10 +86,10 @@ def train_with_data(top_n_features=None, df=None):
     model = create_model(input_dim, 1, 128)
     model.compile(loss='categorical_crossentropy',
                   optimizer='adam', metrics=['accuracy'])
-    cp = ModelCheckpoint(filepath=f'./models/model_{input_dim}.h5',
+    cp = ModelCheckpoint(filepath=f'./models-fixed/model_{input_dim}.h5',
                          save_best_only=True,
                          verbose=0)
-    tb = TensorBoard(log_dir=f'./logs',
+    tb = TensorBoard(log_dir=f'./logs-fixed',
                      histogram_freq=0,
                      write_graph=True,
                      write_images=True)
