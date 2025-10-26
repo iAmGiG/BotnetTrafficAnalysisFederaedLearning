@@ -45,7 +45,7 @@ FLAGS = flags.FLAGS
 def get_train_data(top_n_features=10):
     print("Loading combined training data...")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
-    fisher = pd.read_csv('../fisher.csv')
+    fisher = pd.read_csv('../data/fisher/fisher.csv')
     y_train = []
     with open("../data/labels.txt", 'r') as labels:
         for lines in labels:

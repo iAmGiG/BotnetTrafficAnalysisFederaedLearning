@@ -1,8 +1,8 @@
 ## Python dependencies
-Check that you have python dependencies installed listed in `requirements.txt` file
+Check that you have python dependencies installed listed in `../requirements.txt` file
 
 ## Download the dataset
-Use `download_data.py` script
+Use `python ../scripts/download_data.py` script
 
 Then extract rar files into respective `{device_name}/gafgyt_attack/` and `{device_name}/mirai_attack/` directories
 

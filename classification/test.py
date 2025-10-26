@@ -18,7 +18,7 @@ def test(num_features, model_name):
 def test_with_data(num_features, model_name, df):
     X = df.drop(columns=['class'])
     if num_features is not None:
-        fisher = pd.read_csv('../fisher.csv')
+        fisher = pd.read_csv('../data/fisher/fisher.csv')
         features = fisher.iloc[0:int(num_features)]['Feature'].values
         X = X[list(features)]
     Y = pd.get_dummies(df['class'])

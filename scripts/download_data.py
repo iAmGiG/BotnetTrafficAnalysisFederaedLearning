@@ -9,7 +9,7 @@ import json
 
 
 def read_config():
-    with open('config.json', 'r') as f:
+    with open('../config/devices.json', 'r') as f:
         return json.load(f)
 
 def download(argv):

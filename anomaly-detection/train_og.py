@@ -18,7 +18,7 @@ def train(top_n_features=10):
     print("Loading combined training data...")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
 
-    fisher = pd.read_csv('../fisher.csv')
+    fisher = pd.read_csv('../data/fisher/fisher.csv')
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
     # split randomly shuffled data into 3 equal parts

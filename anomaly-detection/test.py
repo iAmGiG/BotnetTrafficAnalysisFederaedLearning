@@ -30,7 +30,7 @@ def test(top_n_features=115):
 def test_with_data(top_n_features, df_malicious):
     print("Testing")
     df = pd.concat((pd.read_csv(f) for f in iglob('../data/**/benign_traffic.csv', recursive=True)), ignore_index=True)
-    fisher = pd.read_csv('../fisher.csv')
+    fisher = pd.read_csv('../data/fisher/fisher.csv')
     features = fisher.iloc[0:int(top_n_features)]['Feature'].values
     df = df[list(features)]
     x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [int(1 / 3 * len(df)), int(2 / 3 * len(df))])

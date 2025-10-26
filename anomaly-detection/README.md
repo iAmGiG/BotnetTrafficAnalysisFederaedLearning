@@ -1,17 +1,17 @@
 # About this project
 The aim is to reproduce this paper's https://arxiv.org/pdf/1805.03409.pdf models.
 
-Some data about model used in papers is in `config.json` file.
+Some data about model used in papers is in `../config/devices.json` file.
 
 ## Python dependencies
-Check that you have python dependencies installed listed in `requirements.txt` file
+Check that you have python dependencies installed listed in `../requirements.txt` file
 
 ## Training models
 
-* Download normal traffic training data using `download_data.py` script. For eachdevice this will create its folder and download there csv with normal traffic data.
+* Download normal traffic training data using `python ../scripts/download_data.py` script. For each device this will create its folder and download there csv with normal traffic data.
 * Run `train.py`, you can give it as parameters names of devices to train the models for. No parameters = train for all devices.
 
-Training will use number of epochs and learning rate from `config.json` file for respective device. 
+Training will use number of epochs and learning rate from `../config/devices.json` file for respective device. 
 
 After successful training `model.h5` is saved to device folder and it can be used for testing.
 
