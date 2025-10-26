@@ -37,8 +37,12 @@ def load_data():
     print('Loaded, shape: ')
     print(df_benign.shape)
     df_benign['class'] = 'benign'
-    df = df_benign.append(df_gafgyt.sample(n=df_benign.shape[0], random_state=17)).append(
-        df_mirai.sample(n=df_benign.shape[0], random_state=17))
+    # FIX Issue #14: Replace deprecated DataFrame.append() with pd.concat()
+    df = pd.concat([
+        df_benign,
+        df_gafgyt.sample(n=df_benign.shape[0], random_state=17),
+        df_mirai.sample(n=df_benign.shape[0], random_state=17)
+    ], ignore_index=True)
     return df
 
 

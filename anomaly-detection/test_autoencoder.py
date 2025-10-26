@@ -14,12 +14,10 @@ import lime.lime_tabular
 def load_mal_data():
     df_mirai = pd.concat((pd.read_csv(f) for f in iglob('../data/**/mirai_attacks/*.csv', recursive=True)),
                          ignore_index=True)
-    df_gafgyt = pd.DataFrame()
-    for f in iglob('../data/**/gafgyt_attacks/*.csv', recursive=True):
-        #    if 'tcp.csv' in f or 'udp.csv' in f:
-        #        continue
-        df_gafgyt = df_gafgyt.append(pd.read_csv(f), ignore_index=True)
-    return df_mirai.append(df_gafgyt)
+    # FIX Issue #14: Replace deprecated DataFrame.append() with pd.concat()
+    gafgyt_dfs = [pd.read_csv(f) for f in iglob('../data/**/gafgyt_attacks/*.csv', recursive=True)]
+    df_gafgyt = pd.concat(gafgyt_dfs, ignore_index=True) if gafgyt_dfs else pd.DataFrame()
+    return pd.concat([df_mirai, df_gafgyt], ignore_index=True)
     # return df_mirai
 
 
@@ -37,7 +35,8 @@ def test_with_data(top_n_features, df_malicious):
     x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [
                                       int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     scaler = StandardScaler()
-    scaler.fit(x_train.append(x_opt))
+    # FIX Issue #13: Only fit scaler on training data to prevent data leakage
+    scaler.fit(x_train)
 
     print(f"Loading model")
     saved_model = load_model(f'models/model_{top_n_features}.h5')

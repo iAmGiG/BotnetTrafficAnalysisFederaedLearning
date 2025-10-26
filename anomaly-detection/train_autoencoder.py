@@ -26,7 +26,8 @@ def train(top_n_features=10):
     x_train, x_opt, x_test = np.split(df.sample(frac=1, random_state=17), [
                                       int(1 / 3 * len(df)), int(2 / 3 * len(df))])
     scaler = StandardScaler()
-    scaler.fit(x_train.append(x_opt))
+    # FIX Issue #13: Only fit scaler on training data to prevent data leakage
+    scaler.fit(x_train)
     x_train = scaler.transform(x_train)
     x_opt = scaler.transform(x_opt)
     x_test = scaler.transform(x_test)
