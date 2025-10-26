@@ -60,6 +60,10 @@ data/
 !data/fisher/*.csv
 !data/fisher/demonstrate_structure.csv
 
+# Analysis outputs (generated figures)
+analysis/*.png
+analysis/*.jpg
+
 # Model files
 *.h5
 *.pb
