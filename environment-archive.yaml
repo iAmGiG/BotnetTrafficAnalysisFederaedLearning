@@ -1,0 +1,60 @@
+# Conda Environment for Archive Branch (2020-era Dependencies)
+# This environment preserves the original 2020 research codebase with compatible dependencies
+#
+# Create environment:
+#   conda env create -f environment-archive.yaml
+#
+# Activate environment:
+#   conda activate botnet-archive-2020
+
+name: botnet-archive-2020
+
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  # Python version - 3.9 required (TFF 0.40.0 requires Python >=3.9)
+  # Note: Original dev notes said 3.7-3.8, but pip shows TFF 0.40.0 needs 3.9+
+  - python=3.9
+
+  # Core ML/DL (conda)
+  - tensorflow=2.10.*          # Last version before major keras changes
+  # Note: keras is bundled with TF 2.10, no separate install needed
+
+  # Data Science
+  - numpy=1.21.*               # Compatible with TF 2.10
+  - pandas=1.3.*               # Before .append() deprecation (1.4.0+)
+  - scikit-learn=1.0.*         # Stable 2020-era version
+
+  # Visualization & Monitoring
+  - matplotlib=3.5.*
+
+  # Development tools (optional)
+  - jupyter
+  - ipykernel
+
+  # Pip for packages not available in conda
+  - pip
+
+  # Pip-only dependencies
+  - pip:
+      - tensorflow-federated==0.40.0  # TFF not in conda, use pip
+      - tensorboard==2.10.*           # Match TF version
+      - lime==0.2.0.1                 # Model explainability
+      - wget                          # Data download utility
+
+# Notes:
+# - This pins dependencies to 2020-compatible versions
+# - TensorFlow 2.10 is the last version with full standalone keras support
+# - Pandas 1.3.x is before DataFrame.append() was deprecated
+# - TensorFlow Federated installed via pip (not available in conda)
+# - These versions are tested to work together
+# - Some deprecation warnings may appear but code should run
+# - CPU-only by default (GPU requires additional setup)
+
+# Known Limitations:
+# - PySyft not included (was never actually used in the code)
+# - Simulation-only federated learning (not production-ready)
+# - Some modern security patches not available in older packages
+# - Windows may have compatibility issues with TFF (Linux/Mac preferred)

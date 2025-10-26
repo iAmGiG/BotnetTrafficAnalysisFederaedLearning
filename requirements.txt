@@ -1,9 +1,0 @@
-wget
-numpy
-pandas
-sklearn
-tensorflow_federated
-tensorflow
-keras
-tensorboard
-lime

@@ -109,7 +109,8 @@ def _broadcast_encoder_fn(value):
     spec = tf.TensorSpec(value.shape, value.dtype)
     if value.shape.num_elements() > 10000:
         return te.encoders.as_simple_encoder(
-            te.encoders.uniform_quantization(FLAGS.broadcast_quantization_bits),
+            te.encoders.uniform_quantization(
+                FLAGS.broadcast_quantization_bits),
             spec)
     else:
         return te.encoders.as_simple_encoder(te.encoders.identity(), spec)
@@ -140,7 +141,8 @@ def _mean_encoder_fn(value):
                     FLAGS.aggregation_quantization_bits), spec)
         else:
             return te.encoders.as_gather_encoder(
-                te.encoders.uniform_quantization(FLAGS.aggregation_quantization_bits),
+                te.encoders.uniform_quantization(
+                    FLAGS.aggregation_quantization_bits),
                 spec)
     else:
         return te.encoders.as_gather_encoder(te.encoders.identity(), spec)
