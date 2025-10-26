@@ -52,12 +52,13 @@ def train(top_n_features=10):
                               histogram_freq=1,
                               profile_batch=100000000)
     print(f"Training model for all data combined")
+    # FIX Bug #21: Add ModelCheckpoint callback to actually save models
     model.fit(x_train, x_train,
               epochs=5,
               batch_size=64,
               validation_data=(x_opt, x_opt),
               verbose=1,
-              callbacks=[tensorboard]
+              callbacks=[cp, tensorboard]
               )
 
     print("Calculating threshold")
@@ -99,4 +100,6 @@ def create_model(input_dim):
 
 # %%
 if __name__ == '__main__':
-    train(*sys.argv[1:])
+    # FIX Bug #20: Convert command-line args to int
+    args = [int(arg) if arg.isdigit() else arg for arg in sys.argv[1:]]
+    train(*args)
