@@ -9,11 +9,11 @@ import tensorflow as tf
 import pickle
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
-from keras.models import model_from_yaml
-from keras.models import Model, Sequential
-from keras.layers import Input, Dense, Activation
-from keras.callbacks import ModelCheckpoint, TensorBoard
-from keras.optimizers import Adam
+# FIX Issue #15: Standardize to tensorflow.keras imports
+from tensorflow.keras.models import model_from_yaml, Model, Sequential
+from tensorflow.keras.layers import Input, Dense, Activation
+from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
+from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 
 

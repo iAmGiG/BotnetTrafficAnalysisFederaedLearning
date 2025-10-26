@@ -5,9 +5,9 @@ import os
 import pandas as pd
 from glob import iglob
 import numpy as np
-from keras.models import load_model
+# FIX Issue #15: Standardize to tensorflow.keras imports
+from tensorflow.keras.models import load_model, Model, Sequential
 from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.keras.optimizers import SGD

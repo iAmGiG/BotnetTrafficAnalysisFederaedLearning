@@ -6,7 +6,8 @@ import numpy as np
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
-from keras.models import load_model
+# FIX Issue #15: Standardize to tensorflow.keras imports
+from tensorflow.keras.models import load_model
 from sklearn.model_selection import train_test_split
 import lime
 import lime.lime_tabular

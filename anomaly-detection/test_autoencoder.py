@@ -2,7 +2,8 @@ import sys
 import pandas as pd
 import numpy as np
 import random
-from keras.models import load_model
+# FIX Issue #15: Standardize to tensorflow.keras imports
+from tensorflow.keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
 from glob import iglob
