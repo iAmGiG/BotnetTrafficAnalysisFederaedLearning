@@ -389,7 +389,7 @@ callbacks=[tensorboard]  # Should be: callbacks=[cp, tensorboard]
 - jaxlib 0.3.14 doesn't exist for Python 3.9 on Windows
 - Solution: Accepted that FL code cannot run, tested core functionality only
 
-### Classification Test Results
+### Classification Test Results (Bug-Fixed Code)
 
 **Dataset**: All devices combined (Ecobee_Thermostat only device with extracted attack data)
 
@@ -407,19 +407,19 @@ callbacks=[tensorboard]  # Should be: callbacks=[cp, tensorboard]
 - Training time: ~30 seconds
 - Model: 2-layer MLP (128 hidden units, tanh activation)
 
-**Results (NO data leakage - scaler fit only on training data)**:
+**Results (WITH ALL BUGS FIXED)**:
 ```
 Training:
-  Final loss: 0.0186
-  Final accuracy: 99.83%
+  Final loss: 0.0184
+  Final accuracy: 99.84%
 
 Validation:
-  Final loss: 0.0155
-  Final accuracy: 99.82%
+  Final loss: 0.0146
+  Final accuracy: 99.85%
 
-Test Set (7,868 samples):
-  Loss: 0.0155
-  Accuracy: 99.82%
+Test Set (7,867 samples):
+  Loss: 0.0146
+  Accuracy: 99.85%
 ```
 
 **Confusion Matrix (Test Set)**:
@@ -428,29 +428,39 @@ Test Set (7,868 samples):
               Benign  Gafgyt  Mirai
 Actual Benign   2689      2      0
        Gafgyt      0   2572      0
-       Mirai       1     11   2593
+       Mirai       1      9   2595
 ```
 
 **Per-Class Performance**:
 - **Benign**: 2689/2691 correct (99.93% accuracy, 2 false positives)
 - **Gafgyt**: 2572/2572 correct (100% accuracy, perfect!)
-- **Mirai**: 2593/2605 correct (99.54% accuracy, 12 errors)
-- **Overall**: 7854/7868 correct (99.82% accuracy)
+- **Mirai**: 2595/2605 correct (99.62% accuracy, 10 errors)
+- **Overall**: 7856/7867 correct (99.85% accuracy)
 
 **Observations**:
 1. **Exceptional accuracy with only 5 features** - demonstrates that Fisher score feature selection identified highly discriminative features
 2. **Perfect Gafgyt classification** - 0 errors on 2,572 test samples
 3. **Nearly perfect Benign classification** - only 2 false positives (0.07% error rate)
-4. **Mirai slightly harder** - 12 errors, but still 99.54% accuracy
-5. **Most Mirai errors confused with Gafgyt** - 11 out of 12 errors misclassified as Gafgyt (both are botnets, so semantically similar)
+4. **Mirai slightly harder** - 10 errors, but still 99.62% accuracy
+5. **Most Mirai errors confused with Gafgyt** - 9 out of 10 errors misclassified as Gafgyt (both are botnets, so semantically similar)
 6. **Validation matches test performance** - strong evidence of good generalization, no overfitting
-7. **NO data leakage** - scaler correctly fit only on x_train (classification/train.py:73)
+7. **NO data leakage** - scaler correctly fit only on x_train (classification/train_classifier.py:77)
+8. **All deprecated APIs fixed** - uses pd.concat() and tensorflow.keras imports
+9. **ModelCheckpoint working** - model saved to models-fixed/model_5.h5
+
+**Bugs Fixed in This Run**:
+- Issue #13: Data leakage in scaler fitting
+- Issue #14: Deprecated pandas.append()
+- Issue #15: Mixed keras imports
+- Bug #20: Type conversion for command-line args
+- Bug #21: ModelCheckpoint callback not used
 
 **Comparison to Published Results**:
 - Published paper claims 99.98% with all 115 features
-- This test achieves 99.82% with just 5 features
-- Difference: 0.16% (14 additional errors out of 7,868 samples)
-- **Conclusion**: The published results appear credible. Using 23x fewer features results in minimal accuracy loss.
+- This test achieves 99.85% with just 5 features (bug-fixed code)
+- Previous test (before comprehensive fixes): 99.82% with 5 features
+- Difference from published: 0.13% (10 additional errors out of 7,867 samples)
+- **Conclusion**: The published results appear credible. Using 23x fewer features results in minimal accuracy loss. The bug fixes had MINIMAL impact on results, suggesting the original findings were robust despite the data leakage issue.
 
 ### Comparison to Published Results
 
