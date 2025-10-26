@@ -328,7 +328,7 @@ This project represents **real graduate research** conducted during a challengin
 
 **Results (WITH data leakage bug present)**:
 
-```
+```bash
 Training Loss: 1.0306
 Validation Loss: 0.9583
 Threshold: 2.9124 (mean MSE 0.9583 + std 1.9540)
@@ -394,6 +394,7 @@ callbacks=[tensorboard]  # Should be: callbacks=[cp, tensorboard]
 **Dataset**: All devices combined (Ecobee_Thermostat only device with extracted attack data)
 
 **Configuration**:
+
 - Features: Top 5 (from Fisher scores)
   - MI_dir_L0.01_weight
   - H_L0.01_weight
@@ -408,7 +409,8 @@ callbacks=[tensorboard]  # Should be: callbacks=[cp, tensorboard]
 - Model: 2-layer MLP (128 hidden units, tanh activation)
 
 **Results (NO data leakage - scaler fit only on training data)**:
-```
+
+```bash
 Training:
   Final loss: 0.0186
   Final accuracy: 99.83%
@@ -423,7 +425,8 @@ Test Set (7,868 samples):
 ```
 
 **Confusion Matrix (Test Set)**:
-```
+
+```bash
               Predicted
               Benign  Gafgyt  Mirai
 Actual Benign   2689      2      0
@@ -432,12 +435,14 @@ Actual Benign   2689      2      0
 ```
 
 **Per-Class Performance**:
+
 - **Benign**: 2689/2691 correct (99.93% accuracy, 2 false positives)
 - **Gafgyt**: 2572/2572 correct (100% accuracy, perfect!)
 - **Mirai**: 2593/2605 correct (99.54% accuracy, 12 errors)
 - **Overall**: 7854/7868 correct (99.82% accuracy)
 
 **Observations**:
+
 1. **Exceptional accuracy with only 5 features** - demonstrates that Fisher score feature selection identified highly discriminative features
 2. **Perfect Gafgyt classification** - 0 errors on 2,572 test samples
 3. **Nearly perfect Benign classification** - only 2 false positives (0.07% error rate)
@@ -447,6 +452,7 @@ Actual Benign   2689      2      0
 7. **NO data leakage** - scaler correctly fit only on x_train (classification/train.py:73)
 
 **Comparison to Published Results**:
+
 - Published paper claims 99.98% with all 115 features
 - This test achieves 99.82% with just 5 features
 - Difference: 0.16% (14 additional errors out of 7,868 samples)

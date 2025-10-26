@@ -5,22 +5,26 @@ This directory contains reference materials and documentation used during the re
 ## Files
 
 ### `thesis.pdf`
+
 **Description**: Reference thesis document
 **Attribution**: This is a reference document, NOT the thesis produced by this project
 **Note**: Included for research context and comparison purposes
 
 ### `N_BaIoT_dataset_description.txt`
+
 **Description**: Official dataset description for the N-BaIoT dataset
 **Source**: UCI Machine Learning Repository
-**URL**: https://archive.ics.uci.edu/ml/machine-learning-databases/00442/
+**URL**: <https://archive.ics.uci.edu/ml/machine-learning-databases/00442/>
 **Citation**:
-```
+
+```bash
 Y. Meidan, M. Bohadana, Y. Mathov, Y. Mirsky, D. Breitenbacher, A. Shabtai, and Y. Elovici
 "N-BaIoT: Network-based Detection of IoT Botnet Attacks Using Deep Autoencoders"
 IEEE Pervasive Computing, Special Issue - Securing the IoT (July/Sep 2018)
 ```
 
 **Contents**:
+
 - Dataset creators and source information
 - Past usage and citations
 - Number of instances and attributes (115 features)
@@ -35,8 +39,9 @@ This project resulted in a published paper:
 **Title**: Detecting, Classifying and Explaining IoT Botnet Attacks Using Deep Learning Methods Based on Network Data
 
 **Published**:
-- ScienceDirect: https://www.sciencedirect.com/science/article/pii/S2666827022000081
-- KSU Digital Commons: https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd
+
+- ScienceDirect: <https://www.sciencedirect.com/science/article/pii/S2666827022000081>
+- KSU Digital Commons: <https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd>
 
 **Institution**: Kennesaw State University, Department of Computer Science
 
@@ -45,6 +50,7 @@ This project resulted in a published paper:
 ## Related Materials
 
 For information on the federated learning experimental approaches, see:
+
 - `../archived/experimental/README.md` - Experimental FL attempts
 - `../../PYSYFT_RESEARCH.md` - PySyft and modernization research
 - `../../anomaly-detection/README++.MD` - Development notes and FL details

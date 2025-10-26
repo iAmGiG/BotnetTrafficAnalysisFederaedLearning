@@ -28,6 +28,7 @@
 **Title**: *Detecting, Classifying and Explaining IoT Botnet Attacks Using Deep Learning Methods Based on Network Data*
 
 **Published Papers**:
+
 - [ScienceDirect (Journal Publication)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
 - [Kennesaw State University Digital Commons (Thesis)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
 
