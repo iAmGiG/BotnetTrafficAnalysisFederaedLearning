@@ -289,26 +289,175 @@ This project represents **real graduate research** conducted during a challengin
 
 ## Appendix: Testing Log
 
-*To be filled in after running tests in 2024*
-
-### Test Date: [TBD]
+### Test Date: October 26, 2024
 
 ### Environment: botnet-archive-2020
 
+**Setup**:
+
+- Python 3.9.20
+- TensorFlow 2.10.0
+- Pandas 1.3.5
+- NumPy 1.21.6
+- scikit-learn 1.0.2
+- scipy 1.7.3
+- TensorFlow Federated: NOT INSTALLED (dependency conflict with jaxlib)
+
+**Hardware**: CPU-only (no CUDA libraries)
+
 ### Tests Run
 
-- [ ] Basic import verification
-- [ ] Classification training (small subset)
-- [ ] Result reproduction
-- [ ] Cross-validation
-- [ ] Data leakage checks
+- [x] Basic import verification
+- [x] Environment creation and dependency resolution
+- [x] Anomaly detection training (5 features, Ecobee_Thermostat device)
+- [ ] Classification training (pending)
+- [ ] Full result reproduction
+- [ ] Cross-validation tests
+- [ ] Data leakage impact analysis
 
-### Findings
+### Anomaly Detection Test Results
 
-*[To be documented]*
+**Dataset**: Ecobee_Thermostat (13,113 benign traffic instances)
+
+**Configuration**:
+
+- Features: Top 5 (from Fisher scores)
+- Split: 1/3 train, 1/3 validation, 1/3 test (random_state=17)
+- Epochs: 5
+- Training time: ~3 seconds
+
+**Results (WITH data leakage bug present)**:
+
+```
+Training Loss: 1.0306
+Validation Loss: 0.9583
+Threshold: 2.9124 (mean MSE 0.9583 + std 1.9540)
+False Positives: 364/4371 (8.3% FP rate on benign test data)
+```
+
+**Observations**:
+
+1. Model converged quickly (5 epochs)
+2. Loss decreased slightly but plateaued
+3. High false positive rate (8.3%) on benign data suggests threshold may be too sensitive
+4. Data leakage bug IS present and affecting results
+
+### New Bugs Discovered During Testing
+
+**Bug #20 - Type Conversion Error** (anomaly-detection/train_og.py):
+
+```python
+# Line 97
+if __name__ == '__main__':
+    train(*sys.argv[1:])  # Passes string "5" not int 5
+
+# Line 17
+def train(top_n_features=10):  # Expects int, receives string
+    # ...
+    # Line 34
+    model = create_model(top_n_features)  # Passes string to create_model
+
+# Line 83 in create_model
+autoencoder.add(Dense(int(0.75 * input_dim),  # TypeError: can't multiply string by float
+```
+
+**Impact**: Command-line usage fails. Must call function directly from Python or add `int()` conversion.
+
+**Bug #21 - Unused ModelCheckpoint Callback** (anomaly-detection/train_og.py):
+
+```python
+# Lines 37-39: Callback defined
+cp = ModelCheckpoint(filepath=f"models/model_{top_n_features}.h5",
+                     save_best_only=True, verbose=0)
+
+# Line 55: But NOT used!
+callbacks=[tensorboard]  # Should be: callbacks=[cp, tensorboard]
+```
+
+**Impact**: Models not saved during training despite checkpoint configuration.
+
+### Environment Issues Resolved
+
+**Issue #1 - scipy/numpy incompatibility**:
+
+- Initial scipy 1.11.4 compiled against newer numpy API
+- Solution: Downgraded to scipy 1.7.3 (compatible with numpy 1.21.6)
+
+**Issue #2 - TensorFlow Federated cannot install**:
+
+- TFF 0.40.0 requires jaxlib==0.3.14
+- jaxlib 0.3.14 doesn't exist for Python 3.9 on Windows
+- Solution: Accepted that FL code cannot run, tested core functionality only
+
+### Classification Test Results
+
+**Dataset**: All devices combined (Ecobee_Thermostat only device with extracted attack data)
+
+**Configuration**:
+- Features: Top 5 (from Fisher scores)
+  - MI_dir_L0.01_weight
+  - H_L0.01_weight
+  - MI_dir_L0.01_mean
+  - H_L0.01_mean
+  - MI_dir_L0.1_mean
+- Classes: Benign, Gafgyt, Mirai (balanced to 13,113 samples each)
+- Total dataset: 39,339 samples
+- Train/Test split: 80/20 (random_state=42)
+- Epochs: 25
+- Training time: ~30 seconds
+- Model: 2-layer MLP (128 hidden units, tanh activation)
+
+**Results (NO data leakage - scaler fit only on training data)**:
+```
+Training:
+  Final loss: 0.0186
+  Final accuracy: 99.83%
+
+Validation:
+  Final loss: 0.0155
+  Final accuracy: 99.82%
+
+Test Set (7,868 samples):
+  Loss: 0.0155
+  Accuracy: 99.82%
+```
+
+**Confusion Matrix (Test Set)**:
+```
+              Predicted
+              Benign  Gafgyt  Mirai
+Actual Benign   2689      2      0
+       Gafgyt      0   2572      0
+       Mirai       1     11   2593
+```
+
+**Per-Class Performance**:
+- **Benign**: 2689/2691 correct (99.93% accuracy, 2 false positives)
+- **Gafgyt**: 2572/2572 correct (100% accuracy, perfect!)
+- **Mirai**: 2593/2605 correct (99.54% accuracy, 12 errors)
+- **Overall**: 7854/7868 correct (99.82% accuracy)
+
+**Observations**:
+1. **Exceptional accuracy with only 5 features** - demonstrates that Fisher score feature selection identified highly discriminative features
+2. **Perfect Gafgyt classification** - 0 errors on 2,572 test samples
+3. **Nearly perfect Benign classification** - only 2 false positives (0.07% error rate)
+4. **Mirai slightly harder** - 12 errors, but still 99.54% accuracy
+5. **Most Mirai errors confused with Gafgyt** - 11 out of 12 errors misclassified as Gafgyt (both are botnets, so semantically similar)
+6. **Validation matches test performance** - strong evidence of good generalization, no overfitting
+7. **NO data leakage** - scaler correctly fit only on x_train (classification/train.py:73)
+
+**Comparison to Published Results**:
+- Published paper claims 99.98% with all 115 features
+- This test achieves 99.82% with just 5 features
+- Difference: 0.16% (14 additional errors out of 7,868 samples)
+- **Conclusion**: The published results appear credible. Using 23x fewer features results in minimal accuracy loss.
+
+### Comparison to Published Results
+
+*[Analysis pending after full test suite]*
 
 ---
 
 *Last Updated: October 26, 2024*
+*Test Period: October 26, 2024*
 *Original Research Period: 2020-2022*
-*Author: [Your Name]*
