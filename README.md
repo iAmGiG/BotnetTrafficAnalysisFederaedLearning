@@ -3,8 +3,10 @@
 <div align="center">
 
 [![Main Branch](https://img.shields.io/badge/Branch-main-blue?style=for-the-badge)](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning)
-[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![TensorFlow 2.10+](https://img.shields.io/badge/TensorFlow-2.10+-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
+[![Modernization](https://img.shields.io/badge/Status-Modernizing_2020→2025-orange?style=for-the-badge)](#architecture)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![TensorFlow 2.19](https://img.shields.io/badge/TensorFlow-2.19-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
+[![Flower FL](https://img.shields.io/badge/Flower-1.22-purple?style=for-the-badge)](https://flower.ai/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 [![Published Paper](https://img.shields.io/badge/Published-ScienceDirect-red?style=for-the-badge)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
@@ -61,6 +63,41 @@ This project demonstrates that deep learning models can effectively detect and c
 - **Implementation**: TensorFlow Federated (TFF) simulation
 - **Latest**: `anomaly-detection/train_v04.py`, `run_experiment_*.py`
 - **Note**: Experimental attempts archived in `docs/archived/experimental/`
+
+---
+
+## Architecture
+
+### System Architecture Overview
+
+**Current System (2020)**:
+<div align="center">
+<img src="docs/architecture/images/current/current_system_architecture.png" width="800" alt="Current System Architecture (2020)"/>
+<p><em>Figure 1: Current system architecture showing the 2020 implementation with identified issues (data leakage, broken TFF, hard-coded paths)</em></p>
+</div>
+
+**Target System (2025 Modernized)**:
+<div align="center">
+<img src="docs/architecture/images/target_system_architecture.png" width="800" alt="Target System Architecture (2025)"/>
+<p><em>Figure 2: Target system architecture with modern tools (Python 3.12, TensorFlow 2.19, Flower FL, SHAP explainability)</em></p>
+</div>
+
+### Federated Learning Architecture
+
+<div align="center">
+<img src="docs/architecture/images/target_federated_architecture.png" width="900" alt="Federated Learning Architecture"/>
+<p><em>Figure 3: Federated learning implementation using Flower framework with 9 IoT device clients and FedAvg aggregation</em></p>
+</div>
+
+### Additional Diagrams
+
+- **Data Pipeline**: [Current](docs/architecture/images/current/current_data_pipeline.png) | [Target](docs/architecture/images/target_data_pipeline.png)
+- **File Structure**: [Current](docs/architecture/images/current/current_file_structure.png) | [Target](docs/architecture/images/target_file_structure.png)
+- **Model Architectures**: [Autoencoder](docs/architecture/images/target_autoencoder_architecture.png) | [Classifier](docs/architecture/images/target_classifier_architecture.png)
+- **Deployment**: [Target Architecture](docs/architecture/images/target_deployment_architecture.png)
+- **Dependencies**: [Current System](docs/architecture/images/current/current_dependencies.png)
+
+For detailed architecture documentation, see [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md).
 
 ---
 

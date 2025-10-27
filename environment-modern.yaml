@@ -1,0 +1,107 @@
+# Bleeding-Edge Modern Environment for Botnet Traffic Analysis
+# Python 3.12 with latest stable packages (2025)
+
+name: botnet-modern
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Core Python (latest stable - explicitly 3.12)
+  - python=3.12
+
+  # Deep Learning (bleeding-edge stable)
+  # Note: Installing via pip for latest versions
+  - pip
+
+  # Data Science Stack (latest from conda-forge)
+  - pandas>=2.2
+  - numpy>=2.0
+  - scikit-learn>=1.5
+  - matplotlib>=3.8
+  - seaborn>=0.13
+
+  # Jupyter
+  - jupyter
+  - jupyterlab>=4.0
+  - ipykernel
+  - notebook
+
+  # Visualization
+  - graphviz
+  - python-graphviz
+
+  # Development Tools (latest)
+  - black>=24.0
+  - isort>=5.13
+  - pylint>=3.0
+  - mypy>=1.10
+  - pytest>=8.0
+  - pytest-cov>=5.0
+  - pre-commit>=3.5
+
+  # Utilities
+  - pyyaml>=6.0
+  - tqdm>=4.66
+  - requests>=2.31
+
+  # Install via pip for latest versions
+  - pip:
+      # TensorFlow and Keras (latest stable)
+      - tensorflow>=2.19     # Latest stable with Python 3.12 support
+      - keras>=3.6           # Latest Keras 3.x
+
+      # Federated Learning
+      - flwr>=1.13           # Latest Flower
+      - flwr-datasets>=0.4   # Flower datasets
+
+      # Explainability (latest)
+      - shap>=0.46           # Latest SHAP
+      - lime>=0.2.0          # Keep LIME for comparison
+
+      # MLOps (optional but recommended)
+      - mlflow>=2.18         # Latest MLflow
+      - tensorboard>=2.19    # Latest TensorBoard
+
+      # Synthetic Data Generation (for stretch goals)
+      - sdv>=1.16            # Synthetic Data Vault
+      - ctgan>=0.10          # Conditional GAN for tabular
+
+      # Data Validation
+      - great-expectations>=1.2  # Data quality
+
+# Notes:
+# - Python 3.12.12 (latest stable, ~15-25% faster than 3.11)
+# - TensorFlow 2.19.1 (latest, full Python 3.12 support)
+# - Keras 3.6+ (framework-agnostic)
+# - NumPy 2.0+ (major version with performance improvements)
+# - Pandas 2.2+ (modern, efficient, no .append())
+# - SHAP 0.46+ (latest explainability)
+# - Flower 1.13+ (latest FL framework)
+# - Includes synthetic data tools (SDV, CTGAN)
+# - Great Expectations for data validation
+# - All development tools at latest versions
+
+# Installation (fast with mamba - RECOMMENDED):
+# mamba env create -f environment-modern.yaml
+# conda activate botnet-modern
+
+# Or with conda (slower but works):
+# conda env create -f environment-modern.yaml
+# conda activate botnet-modern
+
+# Verify installation:
+# python --version  # Should be 3.12.12
+# python -c "import tensorflow as tf; print(f'TensorFlow: {tf.__version__}')"  # 2.19.x
+# python -c "import keras; print(f'Keras: {keras.__version__}')"  # 3.6.x
+# python -c "import flwr; print(f'Flower: {flwr.__version__}')"  # 1.13.x
+# python -c "import shap; print(f'SHAP: {shap.__version__}')"  # 0.46.x
+# python -c "import numpy as np; print(f'NumPy: {np.__version__}')"  # 2.x.x
+# python -c "import pandas as pd; print(f'Pandas: {pd.__version__}')"  # 2.2.x
+
+# Performance gains vs 2020 (Python 3.8):
+# - Python runtime: ~25% faster
+# - TensorFlow: ~15% faster
+# - Pandas (with PyArrow): 5-10x faster for some operations
+# - Overall: ~40% performance improvement estimated

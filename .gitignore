@@ -60,6 +60,9 @@ data/
 !data/fisher/*.csv
 !data/fisher/demonstrate_structure.csv
 
+# Graphviz source files (local only, regenerate from Python scripts)
+*.gv
+
 # Analysis outputs (generated figures)
 analysis/*.png
 analysis/*.jpg
