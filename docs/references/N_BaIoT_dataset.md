@@ -1,6 +1,7 @@
 # N-BaIoT Dataset Documentation
 
 ## Dataset Title
+
 **N-BaIoT: Data for network based detection of IoT botnet attacks**
 
 ---
@@ -8,6 +9,7 @@
 ## Source Information
 
 ### Creators
+
 - **Yair Meidan**, Michael Bohadana, Yael Mathov, Yisroel Mirsky, Asaf Shabtai
   *Department of Software and Information Systems Engineering*
   Ben-Gurion University of the Negev, Beer-Sheva, 8410501, Israel
@@ -17,7 +19,8 @@
   Singapore University of Technology and Design, 8 Somapah Rd, Singapore 487372
 
 ### Dataset Information
-- **Donor**: Yair Meidan (yairme@bgu.ac.il)
+
+- **Donor**: Yair Meidan (<yairme@bgu.ac.il>)
 - **Date**: March 2018
 - **Source**: [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/machine-learning-databases/00442/)
 
@@ -55,28 +58,34 @@
 ## Dataset Overview
 
 ### Purpose
+
 This dataset addresses the lack of public botnet datasets for IoT devices. Unlike prior studies that relied on emulated or simulated data, this dataset enables empirical evaluation with **real traffic data** gathered from nine commercial IoT devices infected by authentic botnets in an isolated network.
 
 ### IoT Devices Included
+
 The dataset contains network traffic from **9 commercial IoT devices**:
+
 1. Danmini Doorbell
 2. Ecobee Thermostat
-3. Philips B120N/10 Baby Monitor
-4. Provision PT-737E Security Camera
-5. Provision PT-838 Security Camera
-6. Samsung SNH 1011 N Webcam
-7. SimpleHome XCS7 1002 WHT Security Camera
-8. SimpleHome XCS7 1003 WHT Security Camera
-9. (One additional device)
+3. Ennio Doorbell
+4. Philips B120N/10 Baby Monitor
+5. Provision PT-737E Security Camera
+6. Provision PT-838 Security Camera
+7. Samsung SNH 1011 N Webcam
+8. SimpleHome XCS7 1002 WHT Security Camera
+9. SimpleHome XCS7 1003 WHT Security Camera
 
 ### Attack Types
+
 The dataset facilitates examination of **two major IoT botnets**:
+
 - **Mirai**: One of the most widespread IoT botnets
 - **BASHLITE (Gafgyt)**: Another common IoT botnet
 
 **Attack Scenarios**: 10 different attack types carried by these 2 botnets
 
 ### Data Classification
+
 - **Binary Classification**: Benign vs. Malicious traffic
 - **Multi-class Classification**: 10 attack classes + 1 benign class = 11 total classes
 
@@ -85,9 +94,11 @@ The dataset facilitates examination of **two major IoT botnets**:
 ## Dataset Characteristics
 
 ### Number of Instances
+
 Varies for every device and attack combination.
 
 ### Number of Attributes
+
 **115 independent features** in each CSV file, plus a class label derived from the filename (e.g., "benign" or "TCP attack").
 
 ---
@@ -109,6 +120,7 @@ The features are extracted using the **AfterImage** framework, which creates sta
 ### Time-Frame (Decay Factor Lambda)
 
 How much recent history is captured in the statistics:
+
 - **L5**: Lambda = 5
 - **L3**: Lambda = 3
 - **L1**: Lambda = 1
@@ -139,11 +151,13 @@ Example: `HH_L5_mean` = Channel statistics with Lambda=5, mean value
 ## Original Study Results
 
 ### Methodology
+
 - Trained and optimized a deep autoencoder on **2/3 of benign data** for each of the 9 IoT devices
 - Goal: Capture normal network traffic patterns per device
 - Test data comprised: **1/3 benign data + all malicious data**
 
 ### Results
+
 - Applied trained autoencoders as anomaly detectors on test sets
 - **Achieved 100% True Positive Rate (TPR)** for detecting cyberattacks from all compromised IoT devices
 - Demonstrated device-agnostic detection capability
@@ -160,14 +174,17 @@ This project uses the N-BaIoT dataset for:
 4. **Explainability**: Using LIME to interpret deep learning model decisions
 
 ### Data Download
+
 Use the provided script:
+
 ```bash
 python scripts/download_data.py
 ```
 
-Downloads from: https://archive.ics.uci.edu/ml/machine-learning-databases/00442/
+Downloads from: <https://archive.ics.uci.edu/ml/machine-learning-databases/00442/>
 
 ### Fisher Feature Selection
+
 This project includes Fisher score-based feature selection (see `data/fisher/fisher.csv`) to reduce dimensionality from 115 features to top-N most discriminative features (typically 10-100 features).
 
 ---
@@ -185,6 +202,7 @@ This project includes Fisher score-based feature selection (see `data/fisher/fis
 Please cite the papers above when using this dataset.
 
 **Recommended Citation**:
+
 ```
 Y. Meidan, M. Bohadana, Y. Mathov, Y. Mirsky, D. Breitenbacher, A. Shabtai, and Y. Elovici,
 "N-BaIoT—Network-Based Detection of IoT Botnet Attacks Using Deep Autoencoders,"

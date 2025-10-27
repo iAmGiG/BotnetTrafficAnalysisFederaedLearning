@@ -2,20 +2,21 @@
 
 <div align="center">
 
-[![Main Branch](https://img.shields.io/badge/Branch-main-blue?style=for-the-badge)](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning)
-[![Modernization](https://img.shields.io/badge/Status-Modernizing_2020→2025-orange?style=for-the-badge)](#architecture)
-[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![TensorFlow 2.19](https://img.shields.io/badge/TensorFlow-2.19-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
-[![Flower FL](https://img.shields.io/badge/Flower-1.22-purple?style=for-the-badge)](https://flower.ai/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Main Branch](https://img.shields.io/badge/Branch-main-blue?style=flat-square)](https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning)
+[![Modernization](https://img.shields.io/badge/Status-Modernizing_2020→2025-orange?style=flat-square)](#architecture)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![TensorFlow 2.19](https://img.shields.io/badge/TensorFlow-2.19-FF6F00?style=flat-square&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
+[![Keras 3.11](https://img.shields.io/badge/Keras-3.11-D00000?style=flat-square&logo=keras&logoColor=white)](https://keras.io/)
+[![Flower FL](https://img.shields.io/badge/Flower-1.22-purple?style=flat-square)](https://flower.ai/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-[![Published Paper](https://img.shields.io/badge/Published-ScienceDirect-red?style=for-the-badge)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
-[![KSU Thesis](https://img.shields.io/badge/Thesis-KSU_Digital_Commons-darkred?style=for-the-badge)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
-[![Dataset](https://img.shields.io/badge/Dataset-N--BaIoT_UCI-yellow?style=for-the-badge)](https://archive.ics.uci.edu/ml/machine-learning-databases/00442/)
+[![Published Paper](https://img.shields.io/badge/Published-ScienceDirect-red?style=flat-square)](https://www.sciencedirect.com/science/article/pii/S2666827022000081)
+[![KSU Thesis](https://img.shields.io/badge/Thesis-KSU_Digital_Commons-darkred?style=flat-square)](https://digitalcommons.kennesaw.edu/cgi/viewcontent.cgi?article=1044&context=cs_etd)
+[![Dataset](https://img.shields.io/badge/Dataset-N--BaIoT_UCI-yellow?style=flat-square)](https://archive.ics.uci.edu/ml/machine-learning-databases/00442/)
 
-[![Validated Accuracy](https://img.shields.io/badge/Classification_Accuracy-99.85%25_(validated)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](#key-results)
-[![IoT Devices](https://img.shields.io/badge/IoT_Devices-9-blueviolet?style=for-the-badge)](#architecture)
-[![Features](https://img.shields.io/badge/Features-115-lightblue?style=for-the-badge)](#architecture)
+[![Validated Accuracy](https://img.shields.io/badge/Classification_Accuracy-99.85%25_(validated)-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)](#key-results)
+[![IoT Devices](https://img.shields.io/badge/IoT_Devices-9-blueviolet?style=flat-square)](#architecture)
+[![Features](https://img.shields.io/badge/Features-115-lightblue?style=flat-square)](#architecture)
 
 </div>
 
@@ -270,13 +271,13 @@ See `PYSYFT_RESEARCH.md` for:
 
 1. Danmini Doorbell
 2. Ecobee Thermostat
-3. Philips B120N/10 Baby Monitor
-4. Provision PT-737E Security Camera
-5. Provision PT-838 Security Camera
-6. Samsung SNH 1011 N Webcam
-7. SimpleHome XCS7 1002 WHT Security Camera
-8. SimpleHome XCS7 1003 WHT Security Camera
-9. (One additional device)
+3. Ennio Doorbell
+4. Philips B120N/10 Baby Monitor
+5. Provision PT-737E Security Camera
+6. Provision PT-838 Security Camera
+7. Samsung SNH 1011 N Webcam
+8. SimpleHome XCS7 1002 WHT Security Camera
+9. SimpleHome XCS7 1003 WHT Security Camera
 
 ### Attack Types
 
@@ -329,13 +330,29 @@ See `PYSYFT_RESEARCH.md` for:
 
 ### This Project
 
+**Published Paper:**
+
 ```bibtex
-@article{yourname2022botnet,
+@article{regan2022botnet,
   title={Detecting, Classifying and Explaining IoT Botnet Attacks Using Deep Learning Methods Based on Network Data},
-  author={[Your Name]},
-  journal={[Journal Name]},
+  author={Regan, Christopher M.},
+  journal={Computer \& Security},
   year={2022},
+  publisher={Elsevier},
   url={https://www.sciencedirect.com/science/article/pii/S2666827022000081}
+}
+```
+
+**GitHub Repository:**
+
+```bibtex
+@misc{regan2022github,
+  title={IoT Botnet Traffic Analysis with Federated Learning},
+  author={Regan, Christopher M.},
+  year={2022},
+  publisher={GitHub},
+  howpublished={\url{https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning}},
+  url={https://github.com/iAmGiG/BotnetTrafficAnalysisFederaedLearning}
 }
 ```
 
@@ -358,20 +375,21 @@ See `PYSYFT_RESEARCH.md` for:
 
 ## Branch Information
 
-**Current Branch**: `archive-2020-research`
-**Status**: Archived, functional, preserved research code
+**Current Branch**: `main`
+**Status**: Modern, production-ready implementation
 **Last Updated**: October 2024 (organization and documentation)
 **Original Research Period**: 2020-2022
 
 **Other Branches**:
 
-- `main` - Modern refactored version (coming soon)
+- `archive-2020-research` - Original 2020 research code (preserved)
 - `develop` - Original development branch (historical reference)
 
 ---
 
 ## Contact & Acknowledgments
 
+X
 **Institution**: Kennesaw State University
 **Lab**: CCSE, DSL Laboratory
 **Original Supervisor**: Dr. Reza Parizi
@@ -382,7 +400,11 @@ See `PYSYFT_RESEARCH.md` for:
 
 ## License
 
-[Specify your license here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE)
+file for details.
+
+**Academic Research**: This work was conducted at Kennesaw State University
+(2020-2022) under the supervision of Dr. Reza Parizi.
 
 ---
 
