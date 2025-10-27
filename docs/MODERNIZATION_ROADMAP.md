@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document outlines a complete remaster and overhaul of the IoT Botnet Traffic Analysis project. 
+This document outlines a complete remaster and overhaul of the IoT Botnet Traffic Analysis project.
 This is not just a refactor - it's a comprehensive modernization bringing 2020-era research code to 2025 production standards.
 
 **Key Principles**:
