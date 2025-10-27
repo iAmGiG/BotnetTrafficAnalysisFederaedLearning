@@ -52,6 +52,8 @@ Archive work is **DONE** and merged to main:
 ## Sprint 1 Complete: Architecture Visualization ✅
 
 **Date Completed**: 2025-10-26
+**Committed**: d56d93e
+**Pushed**: ✅ GitHub
 **Priority**: HIGH
 **Status**: COMPLETED
 
@@ -71,10 +73,11 @@ Archive work is **DONE** and merged to main:
 - [x] Cleaned up repository (removed SVG files, kept PNG + .gv source)
 
 **Deliverables**:
-- 11 PNG diagrams (docs/architecture/images/)
-- 11 Graphviz source files (.gv) for regeneration
-- Updated README with Architecture section
-- SPRINT_1_COMPLETE.md summary document
+- 11 PNG diagrams with clear naming (current_* vs target_*)
+- Graphviz .gv sources (local only, gitignored)
+- Updated README with Architecture section and badges
+- Comprehensive planning docs (ROADMAP, STACK, etc.)
+- Environment: Python 3.12.12, TensorFlow 2.19.1, Flower 1.22
 
 **Commands for Regeneration**:
 
@@ -82,15 +85,20 @@ Archive work is **DONE** and merged to main:
 # Activate modern environment
 conda activate botnet-modern
 
-# Regenerate all diagrams (PNG + .gv only)
+# Regenerate all diagrams
 cd docs/architecture/diagrams
 python generate_diagrams.py
 
-# Check output
-ls ../images/current/    # 4 PNG files
-ls ../images/            # 7 PNG files
-ls ./*.gv                # 11 Graphviz source files
+# Output:
+# - current_*.png (4 files in images/current/)
+# - target_*.png (7 files in images/)
+# - *.gv sources (local only, gitignored)
 ```
+
+**Repository Cleanup**:
+- 22 files removed (SVG, .bat/.sh, summaries)
+- Clear naming convention (current_* vs target_*)
+- .gv files local only (not committed)
 
 ---
 
